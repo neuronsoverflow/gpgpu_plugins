@@ -43,7 +43,6 @@ class Plugin
       time_f  fTime;
       int numParams; // the number of parameters this plugin has
 
-      std::string filename; // plugin filename NOTE: delete this??
       std::string name;     // plugin name
 
       std::map<std::string, std::string> params; // key: pName, val: pValue

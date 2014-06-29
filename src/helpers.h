@@ -1,14 +1,16 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
-std::vector<std::string> &split(const std::string &s, char delim,
-                                std::vector<std::string> &elems);
-
+// returns a vector containing the split string
 std::vector<std::string> split(const std::string &s, char delim);
 
+// returns the file name without the file path and without the extension
 std::string shortName(const std::string& filename);
+
+// trims the given string
+void trim(std::string& str);
 
 #endif

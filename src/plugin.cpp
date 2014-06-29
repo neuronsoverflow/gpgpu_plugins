@@ -7,24 +7,15 @@
 #include <vector>
 
 /******************************************************************************
-*
+* Plugin handler class constructor
 ******************************************************************************/
 Plugin::Plugin(const std::string& filename) throw(char*)
 {
-   this->filename = filename;
-
-   // TODO: make a couple of checks before doing the following...
-   // name.insert(0, "./");
-   // name.append(".so");
-
-   // TODO: start clock, and time how long took to load plugin [requirements]
-
    // attempt to load the plugin handler
    handle = dlopen(filename.c_str(), RTLD_NOW);
 
    if (handle == NULL)
       throw (dlerror());
-
 
    // now load the function symbols
    try
@@ -38,14 +29,11 @@ Plugin::Plugin(const std::string& filename) throw(char*)
 
    refreshParams(); // load the parameters from the plugin
 
-   // TODO: once is all loaded, remove the absolute path from the plugin name
-   //or save a new variable called shortName w/ the path and extension stripped
-   // SET NAME here
-
+   this->name = shortName(filename);
 }
 
 /******************************************************************************
-*
+* Plugin destructor
 ******************************************************************************/
 Plugin::~Plugin()
 {
@@ -57,6 +45,7 @@ Plugin::~Plugin()
 ******************************************************************************/
 int Plugin::run()
 {
+   updateParams(); // make sure to set the plugin parameters before running
    return fRun();
 }
 
@@ -124,21 +113,26 @@ void Plugin::loadSymbols() throw(char*)
 }
 
 /******************************************************************************
-*
+* displayParams()
+* - displays the plugin's parameter keys and values
 ******************************************************************************/
 void Plugin::displayParams() const
 {
-                            // PARAM_NAME:  PARAM_VALUE
-                            // input1: ""
-                            // output: out
-   std::map<std::string, std::string>::const_iterator it;
-   std::cout << "PARAM NAME:\t\tPARAM_VALUE\n";
-   for (it = params.begin(); it != params.end(); ++it)
-      std::cout << it->first << " => " << it->second << '\n';
+   std::cout << name << ":\n";
+   if (params.size())
+   {
+      std::map<std::string, std::string>::const_iterator it;
+      std::cout << "\tPARAM NAME => PARAM_VALUE\n";
+      for (it = params.begin(); it != params.end(); ++it)
+         std::cout << "\t" << it->first << " => " << it->second << '\n';
+   }
+   else
+      std::cout << "\tThis plugin has no parameters\n";
 }
 
 /******************************************************************************
-* // getParams() that sets the params map
+* refreshParams()
+* - reads the parameters from the plugin and stores them in the params map
 ******************************************************************************/
 void Plugin::refreshParams()
 {
@@ -154,7 +148,7 @@ void Plugin::refreshParams()
    error = getParams(bufferValues, 1024);
    if (error == ERROR)
    {
-      // TODO: handle it the error
+      std::cout << "Unexpected error in " << __PRETTY_FUNCTION__ << std::endl;
    }
 
    std::vector<std::string> keys = split(bufferKeys, ',');
@@ -162,8 +156,7 @@ void Plugin::refreshParams()
 
    if (keys.size() != vals.size())
    {
-      // TODO: handle the error
-      // printf("Unexpected error!!!\n");
+      std::cout << "Unexpected error in " << __PRETTY_FUNCTION__ << std::endl;
    }
 
    for (unsigned int i = 0; i < keys.size(); i++)
@@ -174,7 +167,6 @@ void Plugin::refreshParams()
 * updateParams()
 * - reads the parameters from the `params` map, builds a string with all
 *   parameters and sets those values in the plugin w/ setParams()
-* // setParams() from the values in the params map
 ******************************************************************************/
 void Plugin::updateParams()
 {
@@ -186,25 +178,25 @@ void Plugin::updateParams()
       values[values.size() - 1] = '\0'; // delete the last inserted DELIM
    if (setParams(values.c_str()) == ERROR)
    {
-      // TODO: handle the error
+      std::cout << "Unexpected error in " << __PRETTY_FUNCTION__ << std::endl;
    }
 }
 
 /******************************************************************************
-*
+* setParam()
+* - changes the value of the parameter with that has the given key
 ******************************************************************************/
 void Plugin::setParam(std::string key, std::string value)
 {
    std::map<std::string, std::string>::iterator it;
 
    it = params.find(key);
-
    if (it != params.end())
    {
       it->second = value;
    }
    else
    {
-      // TODO: handle the error
+      std::cout << "invalid parameter key\n";
    }
 }

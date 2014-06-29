@@ -1,11 +1,3 @@
-// this class handles all the user interaction with the plugins
-// the user can:
-//   - load plugins
-//   - view it's settings
-//   - change it's settings / parameters
-//   - run the program of a plugin, and etc...
-
-
 #ifndef PLUGIN_ENGINE_H
 #define PLUGIN_ENGINE_H
 
@@ -14,6 +6,16 @@
 #include <string>
 #include <vector>
 
+/******************************************************************************
+* PluginEngine class
+*  this class handles all the user interaction with the plugins.
+*  the user is able to:
+*  - load plugins
+*  - view the plugin's parameters
+*  - set the plugin's parameters
+*  - run the program of a plugin
+*  - list all loaded plugins and their parameters
+******************************************************************************/
 class PluginEngine
 {
    public:
@@ -23,9 +25,8 @@ class PluginEngine
    private:
       std::map<std::string, Plugin*> plugins;
 
-      void display();
+      void displayPlugins(); // lists all loaded plugins and their parameters
       void displayOptions();
-      int parseCommand(std::string cmd); // set, run, get, ??????????????
       std::string getCommand();
       void loadPlugin(std::string filename);
       bool isValidCommand(const std::vector<std::string>& cmd);
