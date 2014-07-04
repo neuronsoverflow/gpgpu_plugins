@@ -9,15 +9,7 @@
 #include <time.h>   /* clock_t */
 #include <string.h> /* strcpy  */
 #include "constants.h"
-
-typedef enum { false, true } bool;
-
-/*                             FUNCTION PROTOTYPES                           */
-int setParams(const char* buffer);
-int getParams(char* buffer, int bufferSize);
-int run();
-char* queryParamInfo();
-clock_t getRunTime();
+#include "pluginHeader.h"
 
 /* globals */
 char params[][256] = { "input1", "input2", "output" };
@@ -65,7 +57,8 @@ int setParams(const char* buffer)
 
 /******************************************************************************
 *
-******************************************************************************/int getParams(char*buffer, int bufferSize)
+******************************************************************************/
+int getParams(char*buffer, int bufferSize)
 {
    int i;
 
@@ -107,7 +100,7 @@ int setParams(const char* buffer)
 /******************************************************************************
 * - does not use the DELIM to return, uses comma instead
 * - if no params, may return NULL or ""
-******************************************************************************/char* queryParamInfo()
+******************************************************************************/const char* queryParamInfo()
 {
    return "inputFile1,inputFile2,outputFile";
 }

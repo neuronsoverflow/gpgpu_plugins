@@ -6,11 +6,11 @@
 #include <map>
 
 // setup the function pointer types
-typedef int     (*setP_f)  (const char*);
-typedef int     (*getP_f)  (char*, int);
-typedef int     (*run_f)   ();
-typedef char*   (*query_f) ();
-typedef clock_t (*time_f)  ();
+typedef int         (*setP_f)  (const char*);
+typedef int         (*getP_f)  (char*, int);
+typedef int         (*run_f)   ();
+typedef const char* (*query_f) ();
+typedef clock_t     (*time_f)  ();
 
 // a Wrapper to the loading the dynamic library w/ dlopen...
 class Plugin
@@ -20,7 +20,7 @@ class Plugin
       ~Plugin();
 
       int run();
-      char* getInfo(); // returns a string literal
+      const char* getInfo(); // returns a string literal
       int getParams(char* buffer, int bufferSize);
       int setParams(const char* buffer);
       clock_t getRunTime();

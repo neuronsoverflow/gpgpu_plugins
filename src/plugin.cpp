@@ -49,7 +49,7 @@ int Plugin::run()
    return fRun();
 }
 
-char* Plugin::getInfo()
+const char* Plugin::getInfo()
 {
    return fQuery();
 }
@@ -143,7 +143,7 @@ void Plugin::refreshParams()
    int error;
    char bufferKeys[1024];
    char bufferValues[1024];
-   char* info = getInfo();
+   const char* info = getInfo();
    strcpy(bufferKeys, info);
    error = getParams(bufferValues, 1024);
    if (error == ERROR)
