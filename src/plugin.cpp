@@ -49,9 +49,9 @@ int Plugin::run()
    return fRun();
 }
 
-const char* Plugin::getInfo()
+int Plugin::setParams(const char* buffer)
 {
-   return fQuery();
+   return fSetParams(buffer);
 }
 
 int Plugin::getParams(char* buffer, int bufferSize)
@@ -59,9 +59,19 @@ int Plugin::getParams(char* buffer, int bufferSize)
    return fGetParams(buffer, bufferSize);
 }
 
-int Plugin::setParams(const char* buffer)
+void* Plugin::displayPluginInfo()
 {
-   return fSetParams(buffer);
+   return fPluginInfo();
+}
+
+const char* Plugin::getParamInfo()
+{
+   return fParamInfo();
+}
+
+int Plugin::getNumArgs()
+{
+   return fNumArgs();
 }
 
 clock_t Plugin::getRunTime()
@@ -80,6 +90,11 @@ void Plugin::loadSymbols() throw(char*)
 
    // load the function pointers
    dlerror();    /* Clear any existing error */
+   fRun = reinterpret_cast<run_f>(dlsym(handle, "run"));
+   if ((error = dlerror()) != NULL)
+      throw(error);
+
+   dlerror();    /* Clear any existing error */
    fSetParams = reinterpret_cast<setP_f>(dlsym(handle, "setParams"));
    if ((error = dlerror()) != NULL)
       throw(error);
@@ -90,12 +105,12 @@ void Plugin::loadSymbols() throw(char*)
       throw(error);
 
    dlerror();    /* Clear any existing error */
-   fRun = reinterpret_cast<run_f>(dlsym(handle, "run"));
+   fPluginInfo = reinterpret_cast<pluginInfo_f>(dlsym(handle, "displayPluginInfo"));
    if ((error = dlerror()) != NULL)
       throw(error);
 
    dlerror();    /* Clear any existing error */
-   fQuery = reinterpret_cast<query_f>(dlsym(handle, "queryParamInfo"));
+   fParamInfo = reinterpret_cast<paramInfo_f>(dlsym(handle, "getParamInfo"));
    if ((error = dlerror()) != NULL)
       throw(error);
 
@@ -106,10 +121,10 @@ void Plugin::loadSymbols() throw(char*)
 
    // load numParams = NUM_ARGS pointer
    dlerror();    /* Clear any existing error */
-   int* pNumParams = reinterpret_cast<int*>(dlsym(handle, "NUM_ARGS"));
+   fNumArgs = reinterpret_cast<numArgs_f>(dlsym(handle, "getNumArgs"));
    if ((error = dlerror()) != NULL)
       throw(error);
-   this->numParams = *pNumParams;
+   this->numParams = fNumArgs();
 }
 
 /******************************************************************************
@@ -121,7 +136,7 @@ void Plugin::displayParams() const
    std::cout << name << ":\n";
    if (params.size())
    {
-      std::map<std::string, std::string>::const_iterator it;
+      OrderedMap::const_iterator it;
       std::cout << "\tPARAM NAME => PARAM_VALUE\n";
       for (it = params.begin(); it != params.end(); ++it)
          std::cout << "\t" << it->first << " => " << it->second << '\n';
@@ -143,7 +158,7 @@ void Plugin::refreshParams()
    int error;
    char bufferKeys[1024];
    char bufferValues[1024];
-   const char* info = getInfo();
+   const char* info = getParamInfo();
    strcpy(bufferKeys, info);
    error = getParams(bufferValues, 1024);
    if (error == ERROR)
@@ -170,8 +185,9 @@ void Plugin::refreshParams()
 ******************************************************************************/
 void Plugin::updateParams()
 {
+   // BUG!!! iterating through the map doesn't keep the items sorted!!!
    std::string values;
-   std::map<std::string, std::string>::const_iterator it;
+   OrderedMap::const_iterator it;
    for (it = params.begin(); it != params.end(); ++it)
       values += it->second + DELIM;
    if (values.size())
@@ -188,12 +204,10 @@ void Plugin::updateParams()
 ******************************************************************************/
 void Plugin::setParam(std::string key, std::string value)
 {
-   std::map<std::string, std::string>::iterator it;
-
-   it = params.find(key);
-   if (it != params.end())
+   int index = params.find(key);
+   if (index != ERROR)
    {
-      it->second = value;
+      params[index].second = value;
    }
    else
    {

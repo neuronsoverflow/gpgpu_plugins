@@ -43,7 +43,8 @@ void PluginEngine::run()
       // make the iterator point to the plugin (this is used in view, set, run)
       it = plugins.find(cmdArgs[1]);
       if (it == plugins.end() &&
-          (cmdArgs[0] == "view" || cmdArgs[0] == "set" || cmdArgs[0] == "run"))
+          (cmdArgs[0] == "view" || cmdArgs[0] == "set" ||
+           cmdArgs[0] == "run"  || cmdArgs[0] == "help"))
       {
          cout << "plugin not found!\n";
          continue;
@@ -66,11 +67,15 @@ void PluginEngine::run()
       {
          (it->second)->run();
       }
+      else if (cmdArgs[0] == "help") // help <plugin_name>
+      {
+         (it->second)->displayPluginInfo();
+      }
       else if (cmdArgs[0] == "list")
       {
          displayPlugins();
       }
-      else if (cmdArgs[0] == "?" || cmdArgs[0] == "help")
+      else if (cmdArgs[0] == "?")
       {
          displayOptions();
       }
@@ -102,8 +107,9 @@ bool PluginEngine::isValidCommand(const vector<string>& cmd)
             (cmd[0] == "view" && s == 2) || // view <plugin_name>
             (cmd[0] == "set"  && s == 4) || // set  <plugin_name> <key> <value>
             (cmd[0] == "run"  && s == 2) || // run  <plugin_name>
+            (cmd[0] == "help" && s == 2) || // help <plugin_name>
             (cmd[0] == "list" && s == 1) || // list
-            ((s == 1) && (cmd[0] == "?" || cmd[0] == "help")) || // ? OR help
+            (cmd[0] == "?"    && s == 1) || // ?
             (cmd[0] == "exit" && s == 1))); // exit
 }
 
@@ -173,7 +179,8 @@ void PluginEngine::displayOptions()
              << "\tview <plugin_name> - displays the plugin's parameters\n"
      << "\tset  <plugin_name> <key> <value> - set a parameter for the plugin\n"
              << "\trun  <plugin_name> - executes the plugin's main program\n"
-             << "\tlist - lists the loaded plugins and their parameters\n"
-             << "\thelp - show these options" << endl
+             << "\thelp <plugin_name> - shows the plugin's help instructions\n"
+     << "\tlist - lists the loaded plugins and their respective parameters\n"
+             << "\t? - show these options\n"
              << "\texit\n";
 }

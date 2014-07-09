@@ -12,16 +12,47 @@
 #include "pluginHeader.h"
 
 /* globals */
-char params[][256] = { "input1", "input2", "output" };
-const int NUM_ARGS = (sizeof params / sizeof params[0]);
+char params[][256] = { };
+const int NUM_ARGS = sizeof params / sizeof params[0];
 clock_t total_t = 0;
+const char* PARAM_INFO = "";
+
+///////////////////////////// PLUGIN FUNCTIONS ////////////////////////////////
 
 /******************************************************************************
-*
+* run()
+* - computes the matrix multiplication: C = A * B
+* - reads the input files from the parameters: A = params[0], B = params[1]
+* - writes the output result C to the file set in params[2]
+* - if params[3] is set, then display the result to the screen
+******************************************************************************/
+int run()
+{
+   clock_t start_t;
+   clock_t end_t;
+   total_t = 0; // reset the clock counter
+
+   start_t = clock();
+   printf("Hello World\n");
+   end_t = clock();
+   total_t = (end_t - start_t) * 1000 / CLOCKS_PER_SEC;
+
+   return OK;
+}
+
+/******************************************************************************
+* setParams()
+* - input: DELIM separated buffer
+* - splits the buffer and sets the "params" to the new passed in parameters
+* - this function only works if all the parameters are passed in to be set
 ******************************************************************************/
 int setParams(const char* buffer)
 {
    int bufferSize = strlen(buffer) + 1; // +1 for '\0'
+
+   // if the buffer is empty, then just return
+   if (bufferSize == 1 && NUM_ARGS == 0)
+      return OK;
 
    // check if the passed in buffer will fit in our params
    if (bufferSize > NUM_ARGS * BUFFER_SIZE)
@@ -56,7 +87,9 @@ int setParams(const char* buffer)
 }
 
 /******************************************************************************
-*
+* getParams()
+* - builds a DELIM delimited string of the current parameter values
+* - sets the "buffer" input to the newly built cstring
 ******************************************************************************/
 int getParams(char*buffer, int bufferSize)
 {
@@ -84,30 +117,34 @@ int getParams(char*buffer, int bufferSize)
 }
 
 /******************************************************************************
-*
-******************************************************************************/int run()
+* returns info / help on how to use this plugin
+******************************************************************************/
+void* displayPluginInfo()
 {
-   clock_t start_t;
-   clock_t end_t;
-   start_t = clock();
-
-   printf("Hello World\n");
-   end_t = clock();
-   total_t = (end_t - start_t) * 1000 / CLOCKS_PER_SEC;
-   return OK;
+   printf("The hello world plugin takes no parameters!\nEnjoy!\n");
+   return NULL;
 }
 
 /******************************************************************************
-* - does not use the DELIM to return, uses comma instead
-* - if no params, may return NULL or ""
-******************************************************************************/const char* queryParamInfo()
+* returns a comma-separated list of the parameter names
+******************************************************************************/
+const char* getParamInfo()
 {
-   return "inputFile1,inputFile2,outputFile";
+   return PARAM_INFO;
+}
+
+/******************************************************************************
+* returns the number of arguments this plugin contains
+******************************************************************************/
+const int getNumArgs()
+{
+   return NUM_ARGS;
 }
 
 /******************************************************************************
 * returns how many milliseconds it took to run the main program
-******************************************************************************/clock_t getRunTime()
+******************************************************************************/
+clock_t getRunTime()
 {
    return total_t;
 }

@@ -25,7 +25,6 @@ class OrderedMap
       int find(const std::string& key); // returns the index for the key
       void clear() { map.clear(); }
 
-
       // iterator support :D
       typedef std::vector<item>::iterator iterator;
       typedef std::vector<item>::const_iterator const_iterator;

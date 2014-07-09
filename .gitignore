@@ -3,3 +3,5 @@
 *.dll
 *.o
 gpgpu
+a.out
+matrix

@@ -1,16 +1,18 @@
 #ifndef PLUGIN_H
 #define PLUGIN_H
 
+#include "orderedMap.h"
 #include <string>
 #include <ctime> // clock_t
-#include <map>
 
 // setup the function pointer types
-typedef int         (*setP_f)  (const char*);
-typedef int         (*getP_f)  (char*, int);
-typedef int         (*run_f)   ();
-typedef const char* (*query_f) ();
-typedef clock_t     (*time_f)  ();
+typedef int         (*run_f)   (); // run()
+typedef int         (*setP_f)  (const char*); // setParams()
+typedef int         (*getP_f)  (char*, int);  // getParams()
+typedef void*       (*pluginInfo_f) ();  // getPluginInfo()
+typedef const char* (*paramInfo_f) ();   // getParamInfo()
+typedef int         (*numArgs_f) ();     // getNumArgs()
+typedef clock_t     (*time_f)  ();       // getRunTime()
 
 // a Wrapper to the loading the dynamic library w/ dlopen...
 class Plugin
@@ -20,10 +22,12 @@ class Plugin
       ~Plugin();
 
       int run();
-      const char* getInfo(); // returns a string literal
-      int getParams(char* buffer, int bufferSize);
       int setParams(const char* buffer);
-      clock_t getRunTime();
+      int getParams(char* buffer, int bufferSize);
+      void*       displayPluginInfo();
+      const char* getParamInfo();
+      int         getNumArgs();
+      clock_t     getRunTime();
 
       void setParam(std::string key, std::string value);
 
@@ -37,24 +41,21 @@ class Plugin
 
       // plugin function handlers
       run_f   fRun;
-      query_f fQuery;
-      getP_f  fGetParams;
       setP_f  fSetParams;
+      getP_f  fGetParams;
+      pluginInfo_f fPluginInfo;
+      paramInfo_f fParamInfo;
+      numArgs_f fNumArgs;
       time_f  fTime;
       int numParams; // the number of parameters this plugin has
 
       std::string name;     // plugin name
 
-      std::map<std::string, std::string> params; // key: pName, val: pValue
+      OrderedMap params;
 
       void loadSymbols() throw(char*);
       void refreshParams(); // getParams() that sets the params map
       void updateParams();  // setParams() from the values in the params map
 };
-
-// this class also needs to keep track of parameters, and make it easy to change just a single parameter (instead of all ... )
-/*
-setParam(string key, string value);
- */
 
 #endif
