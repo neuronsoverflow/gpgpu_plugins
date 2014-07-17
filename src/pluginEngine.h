@@ -19,7 +19,7 @@
 class PluginEngine
 {
    public:
-      PluginEngine();       // check for GPU support
+      PluginEngine();
       void run();
 
    private:
@@ -27,6 +27,7 @@ class PluginEngine
 
       void displayPlugins(); // lists all loaded plugins and their parameters
       void displayOptions();
+      void displayRunTime(const std::map<std::string, Plugin*>::iterator& it);
       std::string getCommand();
       void loadPlugin(std::string filename);
       bool isValidCommand(const std::vector<std::string>& cmd);

@@ -9,7 +9,6 @@
 
 #include "pluginEngine.h"
 
-using namespace std;
 int main(int argc, char** argv)
 {
    try
@@ -19,7 +18,7 @@ int main(int argc, char** argv)
    }
    catch(char* e)
    {
-      cout << e << endl;
+      std::cout << e << std::endl;
    }
 
 

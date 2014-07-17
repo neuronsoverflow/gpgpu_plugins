@@ -1,158 +1,111 @@
 #include <iostream>
 #include <ctime>   /* clock_t */
 #include <cstring> /* strcpy  */
-#include <cstdlib> // atoi
+#include <cstdlib> // atoi, strtoull
 #include <fstream> // ifstream, ofstream
 #include "constants.h"
 #include "pluginHeader.h"
 #include <boost/algorithm/string.hpp> // starts_with
 #include <iomanip> // setw
 
-typedef struct {
-   int width;
-   int height;
-   float* elements;
-} Matrix;
 
-// Matrix functions
-Matrix* readMatrixFile(const char* filename);
-int writeMatrixFile(const char* filename, const Matrix* matrix);
-void displayMatrix(const Matrix* matrix);
-void deleteMatrix(Matrix*& matrix);
+// Prime Number functions
+typedef unsigned long long int uint64;
+int writePrimesFile(const char* filename, const char* primes, uint64 size);
+uint64 getPrimesCount(const char* primes, uint64 size);
+void displayPrimes(const char* primes, uint64 size);
 
-// matrixMulOnDevice is defined in "matrix.cu"
-extern void matrixMulOnDevice(const Matrix* A, const Matrix* B, Matrix* C);
+// genPrimesOnDevice is defined in "primes.cu"
+extern void genPrimesOnDevice(char* primes, uint64 limit);
 
 /* globals */
-char params[][256] = { "inputFileMatrixA.txt", "inputFileMatrixB.txt",
-                       "OutputFileMatrixC.txt", "1" };
+char params[][256] = { "prime_numbers.txt" , "101" };
 const int NUM_ARGS = sizeof params / sizeof params[0];
 clock_t total_t = 0;
-const char* PARAM_INFO = "inputFileMatrixA,inputFileMatrixB,OutputFileMatrixC,displayResult";
+const char* PARAM_INFO = "outputFile,limit";
 
 // TODO: delete main() after we are done testing this!
-int main()
+int main(int argc, char** argv)
 {
-   // strcpy(params[0], "inputFileMatrixA.txt");
-   // strcpy(params[1], "inputFileMatrixB.txt");
-   // strcpy(params[3], "1");
-   run();
-   return 0;
+   if (argc > 1)
+      strcpy(params[1], argv[1]);
+
+   return run();
 }
 
-///////////////////////////// MATRIX FUNCTIONS ////////////////////////////////
+////////////////////////////// PRIME FUNCTIONS ////////////////////////////////
 
 /******************************************************************************
-* readMatrixFile()
-* - opens the file for reading
-* - allocates the matrix, read the elements, return the allocated matrix
+* writePrimesFile() - saves the generated prime numbers to the file
 ******************************************************************************/
-Matrix* readMatrixFile(const char* filename)
-{
-   // open the file
-   std::ifstream fin(filename);
-   if (!fin)
-      return NULL;
-
-   int rows = 0;
-   int cols = 0;
-   float* elements = NULL;
-   Matrix* matrix = NULL;
-   std::string line;
-
-   // read the 1st 2 lines ~ should contain "rows=" and "cols="
-   for (int i = 0; i < 2; i++)
-   {
-      getline(fin, line);
-      if (boost::starts_with(line, "rows="))
-         rows = atoi(line.c_str() + 5);
-      else if (boost::starts_with(line, "cols="))
-         cols = atoi(line.c_str() + 5);
-   }
-
-   if (rows <= 0 || cols <= 0)
-      return NULL;
-
-   elements = new float[rows * cols](); // allocate the array of elements
-
-   // loop, reading al the elements into the array
-   int i = 0;
-   while (fin >> elements[i++] && (i < (rows * cols)));
-
-   fin.close();
-
-   // allocate and assign the matrix items
-   matrix = new Matrix;
-   matrix->width = cols;
-   matrix->height = rows;
-   matrix->elements = elements;
-
-   return matrix;
-}
-
-/******************************************************************************
-* writeMatrix()
-* - writes the matrix to the file
-******************************************************************************/
-int writeMatrixFile(const char* filename, const Matrix* matrix)
+int writePrimesFile(const char* filename, const char* primes, uint64 size)
 {
    // open the file
    std::ofstream fout(filename);
-   if (!fout || !matrix)
+   if (!fout || !primes || !size)
    {
       return ERROR;
    }
 
-   // write the 1st couple of header lines
-   fout << "rows=" << matrix->height << std::endl
-        << "cols=" << matrix->width << std::endl << std::endl;
-
-   int padding = 4; // TODO: dynamically figure out the padding size
-
-   for (int row = 0; row < matrix->height; ++row)
+   /*
+   // write a comma-separated list of primes
+   uint64 count = getPrimesCount(primes, size);
+   for (uint64 i = 0; i < size; i++)
    {
-      for (int col = 0; col < matrix->width; ++col)
-         fout << std::setw(padding)
-              << matrix->elements[row * matrix->width + col]
-              << " ";
-      fout << std::endl;
+      if (primes[i] == 0)
+      {
+         count--;
+         fout << i;
+         if (((i + 1) != size) && count)
+            fout << ", ";
+      }
    }
+   fout << "\n";
+   */
+
+   // write a newline separated list of primes
+   for (uint64 i = 0; i < size; i++)
+   {
+      if (primes[i] == 0) // a value of '0' means the number is prime,
+      {                   // a value of '1' means the number is composite
+         fout << i << "\n";
+      }
+   }
+
    fout.close();
    return OK;
+
 }
 
 /******************************************************************************
-* displays the Matrix elements
+* getPrimesCount() - counts the number of primes
 ******************************************************************************/
-void displayMatrix(const Matrix* matrix)
+uint64 getPrimesCount(const char* primes, uint64 size)
 {
-   if (matrix)
-   {
-      int row;
-      int col;
-      for (row = 0; row < matrix->height; ++row)
-      {
-         for (col = 0; col < matrix->width; ++col)
-            std::cout << matrix->elements[row * matrix->width + col] << " ";
-         std::cout << std::endl;
-      }
-   }
+   uint64 count = 0;
+   for (uint64 i = 0; i < size; i++)
+      if (primes[i] == 0)
+         count++;
+   return count;
 }
 
 /******************************************************************************
-* deallocates the matrix elements
+* displayPrimes() - displays a comma-separated list of prime numbers
 ******************************************************************************/
-void deleteMatrix(Matrix*& matrix)
+void displayPrimes(const char* primes, uint64 size)
 {
-   if (matrix)
+   uint64 count = getPrimesCount(primes, size);
+   for (uint64 i = 0; i < size; i++)
    {
-      if (matrix->elements)
+      if (primes[i] == 0)
       {
-         delete [] matrix->elements;
-         matrix->elements = NULL;
+         count--;
+         std::cout << i;
+         if (((i + 1) != size) && count)
+            std::cout << ", ";
       }
-      matrix = NULL;
    }
+   std::cout << std::endl;
 }
 
 ///////////////////////////// PLUGIN FUNCTIONS ////////////////////////////////
@@ -170,64 +123,46 @@ int run()
    clock_t end_t;
    total_t = 0; // reset the clock counter
 
-   // open and allocate the input Matrix Files
-   Matrix* A = readMatrixFile(params[0]);
-   Matrix* B = readMatrixFile(params[1]);
-   if (!A || !B)
-   {
-      std::cout << "index: " << params[!A ? 0 : 1] << std::endl;
-      std::cout << "Failed to open Matrix file: \"" << params[!A ? 0 : 1]
-                << "\"\n";
-      return ERROR;
-   }
+   uint64 maxPrime = strtoull(params[1], NULL, 10); // TODO: check for errors
+   char* primes;
+   maxPrime++; // allow the given parameter to be part of the search
 
-   if (A->width != B->height) // C = A * B = (example): 3x4 * 4x5 = 3x5
+   #ifdef DEBUG
+   std::cout << "calling genPrimesOnDevice with maxPrime = " << maxPrime << std::endl;
+   #endif
+
+   primes = new (std::nothrow) char[maxPrime]();
+   if (primes == NULL)
    {
-      std::cout << "Invalid matrix dimensions!\n"
-                << "Can't multiply " << A->height << 'x' << A->width << " * "
-                                     << B->height << 'x' << B->width
+      std::cout << "Failed to allocate memory for the prime numbers.\n"
+                << "The limit parameter might be too large: " << maxPrime
                 << std::endl;
       return ERROR;
    }
 
-   // allocate the output Matrix
-   Matrix* C = NULL;
-   C = new Matrix;
-   C->height = A->height;
-   C->width = B->width;
-   C->elements = new float[C->height * C->width]();
-
-   #ifdef DEBUG
-   std::cout << "Multiplying C = A * B\n";
-   std::cout << "A:\n";
-   displayMatrix(A);
-   std::cout << "B:\n";
-   displayMatrix(B);
-   #endif
-
-   // compute the result using the GPU
    start_t = clock();
-   matrixMulOnDevice(A, B, C); // using CUDA
+   genPrimesOnDevice(primes, maxPrime);
    end_t = clock();
    total_t = end_t - start_t;
 
-   // write the result to the file
-   if (writeMatrixFile(params[2], C) == ERROR)
+   // now save to the file
+   std::cout << "Found " << getPrimesCount(primes, maxPrime) << " primes"
+             << " in " << total_t / (double) CLOCKS_PER_SEC << " seconds.\n"
+             << "Writing results to: \"" << params[0]  << "\"\n";
+   int result = writePrimesFile(params[0], primes, maxPrime);
+   if (result == ERROR)
    {
-      std::cout << "Failed to write Matrix to: \"" << params[2] << "\"\n";
+      std::cout << "Failed to write Primes to: \"" << params[0] << "\"\n";
+      std::cout << "Displaying result instead:\n";
+      displayPrimes(primes, maxPrime);
    }
 
-   // check if the result should be displayed
-   if (atoi(params[3])) // params[3] => "0" or "1"
-   {
-      std::cout << "result: \n";
-      displayMatrix(C);
-   }
+   #ifdef DEBUG
+   if (result != ERROR)
+      displayPrimes(primes, maxPrime);
+   #endif
 
-   // no memory leaks
-   deleteMatrix(A);
-   deleteMatrix(B);
-   deleteMatrix(C);
+   delete [] primes;
 
    return OK;
 }

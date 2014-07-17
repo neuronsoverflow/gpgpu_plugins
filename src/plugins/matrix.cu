@@ -1,8 +1,5 @@
 #include <stdio.h>
-#include <helper_cuda.h> // checkCudaErrors()
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <cuda_runtime.h>
+#include <helper_cuda.h> // checkCudaErrors- NVIDIA_CUDA-6.0_Samples/common/inc
 
 typedef struct {
    int width;
@@ -112,13 +109,9 @@ __host__ void freeDeviceMatrix(Matrix& matrix)
 }
 
 /******************************************************************************
-* matrixMulOnDevice()
-* - allocates the matrices on the device
-* - call the kernel to compute C = A * B on the device
-* - store the results back into C (host)
-* - deallocate the device matrices
+* checkDevice()
 ******************************************************************************/
-__host__ void matrixMulOnDevice(const Matrix* A, const Matrix* B, Matrix* C)
+__host__ int checkDevice()
 {
    // query the Device and decide on the block size
    int devID = 0; // the default device ID
@@ -127,7 +120,8 @@ __host__ void matrixMulOnDevice(const Matrix* A, const Matrix* B, Matrix* C)
    error = cudaGetDevice(&devID);
    if (error != cudaSuccess)
    {
-      printf("cudaGetDevice returned error code %d, line(%d)\n", error, __LINE__);
+      printf("CUDA Device not ready or not supported\n");
+      printf("%s: cudaGetDevice returned error code %d, line(%d)\n", __FILE__, error, __LINE__);
       exit(EXIT_FAILURE);
    }
 
@@ -135,11 +129,23 @@ __host__ void matrixMulOnDevice(const Matrix* A, const Matrix* B, Matrix* C)
    if (deviceProp.computeMode == cudaComputeModeProhibited || error != cudaSuccess)
    {
       printf("CUDA device ComputeMode is prohibited or failed to getDeviceProperties\n");
-      return;
+      return EXIT_FAILURE;
    }
 
    // Use a larger block size for Fermi and above (see compute capability)
-   int block_size = (deviceProp.major < 2) ? 16 : 32;
+   return (deviceProp.major < 2) ? 16 : 32;
+}
+
+/******************************************************************************
+* matrixMulOnDevice()
+* - allocates the matrices on the device
+* - call the kernel to compute C = A * B on the device
+* - store the results back into C (host)
+* - deallocate the device matrices
+******************************************************************************/
+__host__ void matrixMulOnDevice(const Matrix* A, const Matrix* B, Matrix* C)
+{
+   int blockSize = checkDevice();
 
    Matrix d_A;
    Matrix d_B;
@@ -157,7 +163,7 @@ __host__ void matrixMulOnDevice(const Matrix* A, const Matrix* B, Matrix* C)
    /* dim3 dimGrid(1, 1); */
    /* dim3 dimBlock(A->width, A->width); */
    // see http://stackoverflow.com/a/19007136 for choice of Block and Grid size
-   dim3 dimBlock(block_size, block_size);
+   dim3 dimBlock(blockSize, blockSize);
    dim3 dimGrid;
    dimGrid.x = (C->width  + dimBlock.x - 1) / dimBlock.x;
    dimGrid.y = (C->height + dimBlock.y - 1) / dimBlock.y;
@@ -169,7 +175,7 @@ __host__ void matrixMulOnDevice(const Matrix* A, const Matrix* B, Matrix* C)
    #endif
 
    // run the kernel
-   if (block_size == 16)
+   if (blockSize == 16)
       matrixMulCUDA<16><<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
    else
       matrixMulCUDA<32><<< dimGrid, dimBlock >>>(d_A, d_B, d_C);
@@ -180,7 +186,8 @@ __host__ void matrixMulOnDevice(const Matrix* A, const Matrix* B, Matrix* C)
 
    // copy the matrix result from device to host
    int mem_size_C = C->height * C->width * sizeof(float);
-   error = cudaMemcpy(C->elements, d_C.elements, mem_size_C, cudaMemcpyDeviceToHost);
+   cudaError_t error = cudaMemcpy(C->elements, d_C.elements, mem_size_C,
+                                  cudaMemcpyDeviceToHost);
    if (error != cudaSuccess)
    {
       printf("cudaMemcpy (C->elements, d_C.elements) returned error code %d, line(%d)\n", error, __LINE__);

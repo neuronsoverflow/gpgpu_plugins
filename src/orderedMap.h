@@ -18,9 +18,9 @@ class OrderedMap
       OrderedMap();
       void insert(std::pair<std::string, std::string>);
       std::string& operator[] (const std::string& key);
-      std::pair<std::string, std::string>& operator[] (unsigned int index);
+      item& operator[] (unsigned int index);
 
-      unsigned int size() const { return map.size(); }
+      size_t size() const { return map.size(); }
       bool hasKey(const std::string& key);
       int find(const std::string& key); // returns the index for the key
       void clear() { map.clear(); }

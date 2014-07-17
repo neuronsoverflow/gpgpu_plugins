@@ -49,7 +49,7 @@ std::string& OrderedMap::operator[] (const std::string& key)
    int index = find(key);
    if (index == ERROR)
    {
-      insert(make_pair(key, ""));
+      insert(make_pair(key, "")); // if key not found, insert key w/ blank val
       index = size() - 1;
    }
    return (map[index].second);
@@ -59,7 +59,7 @@ std::string& OrderedMap::operator[] (const std::string& key)
 * operator[index]
 * - returns the key-value pair found in the given index
 ******************************************************************************/
-std::pair<std::string, std::string>& OrderedMap::operator[] (unsigned int index)
+OrderedMap::item& OrderedMap::operator[] (unsigned int index)
 {
    if (index >= size())
       std::cout << "WARNING in orderedMap!! Index out of bounds!\n";

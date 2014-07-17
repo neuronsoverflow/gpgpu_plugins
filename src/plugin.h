@@ -14,7 +14,7 @@ typedef const char* (*paramInfo_f) ();   // getParamInfo()
 typedef int         (*numArgs_f) ();     // getNumArgs()
 typedef clock_t     (*time_f)  ();       // getRunTime()
 
-// a Wrapper to the loading the dynamic library w/ dlopen...
+// a Wrapper for loading the dynamic libraries w/ dlopen...
 class Plugin
 {
    public:

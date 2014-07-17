@@ -9,7 +9,8 @@ using namespace std;
 ******************************************************************************/
 PluginEngine::PluginEngine()
 {
-   // TODO: add GPU compatibility check
+   // NOTE: was planning on checking for GPU support here, but that's the
+   // plugin's task now... (see checkDevice() in the .cu files)
 }
 
 /******************************************************************************
@@ -43,8 +44,9 @@ void PluginEngine::run()
       // make the iterator point to the plugin (this is used in view, set, run)
       it = plugins.find(cmdArgs[1]);
       if (it == plugins.end() &&
-          (cmdArgs[0] == "view" || cmdArgs[0] == "set" ||
-           cmdArgs[0] == "run"  || cmdArgs[0] == "help"))
+          (cmdArgs[0] == "view" || cmdArgs[0] == "set"  ||
+           cmdArgs[0] == "run"  || cmdArgs[0] == "time" ||
+           cmdArgs[0] == "help"))
       {
          cout << "plugin not found!\n";
          continue;
@@ -66,6 +68,10 @@ void PluginEngine::run()
       else if (cmdArgs[0] == "run") // run <plugin_name>
       {
          (it->second)->run();
+      }
+      else if (cmdArgs[0] == "time") // time <plugin_name>
+      {
+         displayRunTime(it);
       }
       else if (cmdArgs[0] == "help") // help <plugin_name>
       {
@@ -107,6 +113,7 @@ bool PluginEngine::isValidCommand(const vector<string>& cmd)
             (cmd[0] == "view" && s == 2) || // view <plugin_name>
             (cmd[0] == "set"  && s == 4) || // set  <plugin_name> <key> <value>
             (cmd[0] == "run"  && s == 2) || // run  <plugin_name>
+            (cmd[0] == "time" && s == 2) || // time  <plugin_name>
             (cmd[0] == "help" && s == 2) || // help <plugin_name>
             (cmd[0] == "list" && s == 1) || // list
             (cmd[0] == "?"    && s == 1) || // ?
@@ -133,6 +140,8 @@ void PluginEngine::loadPlugin(string filename)
    {
       cout << "loading: '" << filename << "'\n";
       plugins[pluginName] = new Plugin(filename);
+      cout << "plugin loaded successfully! Displaying it's parameters:\n";
+      plugins[pluginName]->displayParams();
    }
    catch (char* e)
    {
@@ -169,6 +178,17 @@ void PluginEngine::displayPlugins()
 }
 
 /******************************************************************************
+* displayRunTime() - shows how long the plugin's last run() command took
+******************************************************************************/
+void PluginEngine::displayRunTime(const map<string, Plugin*>::iterator& it)
+{
+   // prime plugin's last run took: 0.000 seconds
+   cout << "\"" << it->first << "\" plugin's last run took: "
+        << (it->second)->getRunTime() / (double) CLOCKS_PER_SEC
+        << " seconds\n";
+}
+
+/******************************************************************************
 * displayOptions()
 * - displays the available options for the user
 ******************************************************************************/
@@ -179,6 +199,7 @@ void PluginEngine::displayOptions()
              << "\tview <plugin_name> - displays the plugin's parameters\n"
      << "\tset  <plugin_name> <key> <value> - set a parameter for the plugin\n"
              << "\trun  <plugin_name> - executes the plugin's main program\n"
+             << "\ttime <plugin_name> - displays the time for the last run()\n"
              << "\thelp <plugin_name> - shows the plugin's help instructions\n"
      << "\tlist - lists the loaded plugins and their respective parameters\n"
              << "\t? - show these options\n"
