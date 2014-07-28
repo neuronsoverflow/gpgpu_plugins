@@ -1,6 +1,12 @@
 #ifndef PLUGINHEADER_H
 #define PLUGINHEADER_H
 
+#ifdef __cplusplus
+   #include <ctime>  // clock_t
+#else
+   #include <time.h> // clock_t
+#endif
+
 /*                             FUNCTION PROTOTYPES                           */
    // we need the extern "C" when compiled w/ C++ so that the function
    // symbol names won't get mangled for linking (useful for dlopen())

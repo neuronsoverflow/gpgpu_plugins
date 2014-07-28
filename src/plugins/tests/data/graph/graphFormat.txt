@@ -1,0 +1,24 @@
+starting_node destination_edge weight (dest_edge weight)...
+starting_node destination_edge weight (dest_edge weight)...
+starting_node destination_edge weight (dest_edge weight)...
+starting_node destination_edge weight (dest_edge weight)...
+
+graph format example:
+0 2 4 3 2
+1 2 1
+2 0 4 1 1 4 3
+3 0 2
+4 2 3
+
+// In this file format, for example the first line,
+// 0 2 4 3 2
+// means that node 0 has an edge to node 2 of weight 4
+// and an edge to node 3 of weight 2.
+
+// NOTE that for the program, all graphs are undirected, so make sure that
+// the graph file contains the edges "pointing" to both ways.
+// example: in the example above, node 0 has an edge to node 2 of weight 4
+//          so node 2 must also contain an edge to node 0 of weight 4.
+
+// another NOTE: the program requires that all nodes start at index 0
+//               and increase their node numbers by 1 (so 0,1,2,3,...)

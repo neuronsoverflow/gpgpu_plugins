@@ -17,9 +17,9 @@ __global__ static void sieveInitCUDA(char* primes)
 ******************************************************************************/
 __global__ static void sieveEvenNumbersCUDA(char* primes, uint64_t max)
 {
-   uint64_t index = blockIdx.x * blockDim.x + threadIdx.x + threadIdx.x + 4;
+   uint64_t index = blockIdx.x * blockDim.x *2 + threadIdx.x + threadIdx.x + 4;
    if (index < max)
-      primes[index] = 1;
+      primes[index] = 1; // mark off the even numbers
 }
 
 /******************************************************************************
@@ -34,15 +34,13 @@ __global__ static void sieveOfEratosthenesCUDA(char *primes, uint64_t max,
                                                const uint64_t maxRoot)
 {
    // get the starting index, sieve only odds starting at 3
-   // 3,5,7,9,11,13...
-   /* int index = blockIdx.x * blockDim.x + threadIdx.x + threadIdx.x + 3; */
-
-   // apparently the following indexing usage is faster than the one above. Hmm
-   int index = blockIdx.x * blockDim.x + threadIdx.x + 3;
+   // block 0: 3,   5,  7,  9, 11, 13, ...,  65
+   // block 1: 67, 69, 71, 73, 75, 77, ..., 129
+   uint64_t index = blockIdx.x * blockDim.x *2 + threadIdx.x + threadIdx.x + 3;
 
    // make sure index won't go out of bounds, also don't start the execution
    // on numbers that are already composite
-   if (index < maxRoot && primes[index] == 0)
+   if (index <= maxRoot && primes[index] == 0)
    {
       // mark off the composite numbers
       for (int j = index * index; j < max; j += index)
@@ -104,8 +102,11 @@ __host__ void genPrimesOnDevice(char* primes, uint64_t max)
 
    // setup the execution configuration
    dim3 dimBlock(blockSize);
-   dim3 dimGrid((maxRoot + dimBlock.x) / dimBlock.x);
-   dim3 dimGridEvens(((max + dimBlock.x) / dimBlock.x) / 2);
+   // dim3 dimGrid((maxRoot + dimBlock.x) / dimBlock.x);
+   dim3 dimGrid(ceil(
+                   (maxRoot + dimBlock.x) / (double) dimBlock.x) / (double) 2);
+   dim3 dimGridEvens(ceil(
+                        (max + dimBlock.x) / (double) dimBlock.x) / (double) 2);
 
    // if for some reason, the user wants to find primes below 32 @.@ ...
    if (dimGridEvens.x < 1)
@@ -113,6 +114,8 @@ __host__ void genPrimesOnDevice(char* primes, uint64_t max)
 
    //////// debug
    #ifdef DEBUG
+   printf("max: %llu\n", max);
+   printf("maxRoot: %llu\n", maxRoot);
    printf("dimBlock(%d, %d, %d)\n", dimBlock.x, dimBlock.y, dimBlock.z);
    printf("dimGrid(%d, %d, %d)\n", dimGrid.x, dimGrid.y, dimGrid.z);
    printf("dimGridEvens(%d, %d, %d)\n", dimGridEvens.x, dimGridEvens.y, dimGridEvens.z);
@@ -121,6 +124,11 @@ __host__ void genPrimesOnDevice(char* primes, uint64_t max)
    // call the kernel
    // NOTE: no need to synchronize after each kernel
    // http://stackoverflow.com/a/11889641/2261947
+
+   // NOTE: not sure why the 1st memset won't work. That would replace the
+   //       sieveInitCUDA kernel...
+   // checkCudaErrors(cudaMemset(primes, 0, sizeof(char)));
+   // checkCudaErrors(cudaMemset(primes + 1, 1, sizeof(char)));
    sieveInitCUDA<<<1, 1>>>(d_Primes); // launch a single thread to initialize
    sieveEvenNumbersCUDA<<<dimGridEvens, dimBlock>>>(d_Primes, max);
    sieveOfEratosthenesCUDA<<<dimGrid, dimBlock>>>(d_Primes, max, maxRoot);

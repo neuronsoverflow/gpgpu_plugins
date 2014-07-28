@@ -4,5 +4,4 @@
 *.o
 gpgpu
 a.out
-matrix
-prime
+tmp/**

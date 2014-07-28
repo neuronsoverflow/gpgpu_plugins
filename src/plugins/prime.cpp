@@ -1,22 +1,22 @@
-#include <iostream>
-#include <ctime>   /* clock_t */
-#include <cstring> /* strcpy  */
-#include <cstdlib> // atoi, strtoull
-#include <fstream> // ifstream, ofstream
 #include "constants.h"
 #include "pluginHeader.h"
 #include <boost/algorithm/string.hpp> // starts_with
+#include <cstdlib> // atoi, strtoull
+#include <cstring> /* strcpy */
+#include <fstream> // ifstream, ofstream
 #include <iomanip> // setw
+#include <iostream>
 
+typedef unsigned long long int uint64;
 
 // Prime Number functions
-typedef unsigned long long int uint64;
 int writePrimesFile(const char* filename, const char* primes, uint64 size);
 uint64 getPrimesCount(const char* primes, uint64 size);
 void displayPrimes(const char* primes, uint64 size);
 
 // genPrimesOnDevice is defined in "primes.cu"
 extern void genPrimesOnDevice(char* primes, uint64 limit);
+void genPrimesOnHost(char* primes, uint64 limit);
 
 /* globals */
 char params[][256] = { "prime_numbers.txt" , "101" };
@@ -24,16 +24,47 @@ const int NUM_ARGS = sizeof params / sizeof params[0];
 clock_t total_t = 0;
 const char* PARAM_INFO = "outputFile,limit";
 
-// TODO: delete main() after we are done testing this!
+/******************************************************************************
+* main()
+* - this function is not used by the plugin, but this can be built as
+*   a standalone executable
+******************************************************************************/
 int main(int argc, char** argv)
 {
+   if (argc == 1)
+   {
+      std::cout << "Usage: " << argv[0]
+                << " upperLimit outputFile\n";
+      return 0;
+   }
+
    if (argc > 1)
+   {
+      if (strcmp(argv[1], "--help") == 0)
+      {
+         displayPluginInfo();
+         return 0;
+      }
       strcpy(params[1], argv[1]);
+   }
+
+   if (argc > 2)
+      strcpy(params[0], argv[2]);
 
    return run();
 }
 
 ////////////////////////////// PRIME FUNCTIONS ////////////////////////////////
+
+/******************************************************************************
+* TODO: implement me
+* genPrimesOnHost
+* - does the computation in serial, using the CPU
+******************************************************************************/
+void genPrimesOnHost(char* primes, uint64 limit)
+{
+
+}
 
 /******************************************************************************
 * writePrimesFile() - saves the generated prime numbers to the file
@@ -248,7 +279,13 @@ int getParams(char*buffer, int bufferSize)
 ******************************************************************************/
 void* displayPluginInfo()
 {
-   printf("welcome! this is the matrix plugin...\nblah\nblah\nblah\n");
+   std::cout << "This program runs on the GPU and generates prime numbers.\n"
+             << "There's two settings for this plugin. They are as follows:\n"
+             << "\t* limit - an integer for the upper number limit to check for primality\n"
+             << "\t* outputFile - the file where results will be store\n"
+             << "By default, the generated primes won't be displayed to the screen.\n"
+             << "However, if an error occurs while writing the results to the file, this program\n"
+             << "will display the generated list of prime numbers.\n";
    return NULL;
 }
 

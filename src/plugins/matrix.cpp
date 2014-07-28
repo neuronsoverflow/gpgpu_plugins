@@ -1,12 +1,11 @@
-#include <iostream>
-#include <ctime>   /* clock_t */
-#include <cstring> /* strcpy  */
-#include <cstdlib> // atoi
-#include <fstream> // ifstream, ofstream
 #include "constants.h"
 #include "pluginHeader.h"
 #include <boost/algorithm/string.hpp> // starts_with
+#include <cstdlib> // atoi
+#include <cstring> /* strcpy  */
+#include <fstream> // ifstream, ofstream
 #include <iomanip> // setw
+#include <iostream>
 
 typedef struct {
    int width;
@@ -22,25 +21,64 @@ void deleteMatrix(Matrix*& matrix);
 
 // matrixMulOnDevice is defined in "matrix.cu"
 extern void matrixMulOnDevice(const Matrix* A, const Matrix* B, Matrix* C);
+void matrixMulOnHost(const Matrix* A, const Matrix* B, Matrix* C);
+
+enum inputs { INPUTA, INPUTB, OUTPUT, DISPLAY };
 
 /* globals */
 char params[][256] = { "inputFileMatrixA.txt", "inputFileMatrixB.txt",
-                       "OutputFileMatrixC.txt", "1" };
+                       "OutputFileMatrixC.txt", "0" };
 const int NUM_ARGS = sizeof params / sizeof params[0];
 clock_t total_t = 0;
 const char* PARAM_INFO = "inputFileMatrixA,inputFileMatrixB,OutputFileMatrixC,displayResult";
 
-// TODO: delete main() after we are done testing this!
-int main()
+/******************************************************************************
+* main()
+* - this function is not used by the plugin, but this can be built as
+*   a standalone executable
+******************************************************************************/
+int main(int argc, char** argv)
 {
-   // strcpy(params[0], "inputFileMatrixA.txt");
-   // strcpy(params[1], "inputFileMatrixB.txt");
-   // strcpy(params[3], "1");
-   run();
-   return 0;
+   if (argc == 1)
+   {
+      std::cout << "Usage: " << argv[0]
+                << " inputFileA inputFileB outputFileC displayResult\n";
+      return 0;
+   }
+
+   if (argc > 1)
+   {
+      if (strcmp(argv[1], "--help") == 0)
+      {
+         displayPluginInfo();
+         return 0;
+      }
+      strcpy(params[INPUTA], argv[1]);
+   }
+
+   if (argc > 2)
+      strcpy(params[INPUTB], argv[2]);
+
+   if (argc > 3)
+      strcpy(params[OUTPUT], argv[3]);
+
+   if (argc > 4)
+      strcpy(params[DISPLAY], argv[4]);
+
+   return run();
 }
 
 ///////////////////////////// MATRIX FUNCTIONS ////////////////////////////////
+
+/******************************************************************************
+* TODO: implement me
+* matrixMulOnHost
+* - does the computation in serial, using the CPU
+******************************************************************************/
+void matrixMulOnHost(const Matrix* A, const Matrix* B, Matrix* C)
+{
+
+}
 
 /******************************************************************************
 * readMatrixFile()
@@ -171,8 +209,8 @@ int run()
    total_t = 0; // reset the clock counter
 
    // open and allocate the input Matrix Files
-   Matrix* A = readMatrixFile(params[0]);
-   Matrix* B = readMatrixFile(params[1]);
+   Matrix* A = readMatrixFile(params[INPUTA]);
+   Matrix* B = readMatrixFile(params[INPUTB]);
    if (!A || !B)
    {
       std::cout << "index: " << params[!A ? 0 : 1] << std::endl;
@@ -212,13 +250,13 @@ int run()
    total_t = end_t - start_t;
 
    // write the result to the file
-   if (writeMatrixFile(params[2], C) == ERROR)
+   if (writeMatrixFile(params[OUTPUT], C) == ERROR)
    {
-      std::cout << "Failed to write Matrix to: \"" << params[2] << "\"\n";
+      std::cout << "Failed to write Matrix to: \"" << params[OUTPUT] << "\"\n";
    }
 
    // check if the result should be displayed
-   if (atoi(params[3])) // params[3] => "0" or "1"
+   if (atoi(params[DISPLAY])) // params[DISPLAY] => "0" or "1"
    {
       std::cout << "result: \n";
       displayMatrix(C);
@@ -313,7 +351,18 @@ int getParams(char*buffer, int bufferSize)
 ******************************************************************************/
 void* displayPluginInfo()
 {
-   printf("welcome! this is the matrix plugin...\nblah\nblah\nblah\n");
+   std::cout << "The Matrix plugin is intended to quickly compute the multiplication of matrices.\n"
+             << "The paramaters that can be set are as follows:\n"
+             << "\t* inputFileMatrixA - the (left) matrix file operand\n"
+             << "\t* inputFileMatrixB - the (right) matrix file operand\n"
+             << "\t* inputFileMatrixC - the resulting matrix file (C = A * B)\n"
+             << "\t* displayResult - this option can be set to '0' or '1'.\n "
+             << "                         if set to true, the result of the operation will be\n"
+             <<"                          displayed on the screen when done computing.\n"
+             << "Note: the input files follow a very specific type of format.\n"
+             << "They must list the number of rows and cols, followed by a blank line.\n"
+             << "Following that, each matrix row should be located in a single line.\n";
+
    return NULL;
 }
 

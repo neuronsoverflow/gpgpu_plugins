@@ -1,4 +1,5 @@
-CCFLAGS=-Wall -O0 -g
+# CCFLAGS=-Wall -O0 -g
+CCFLAGS=-Wall -O3
 CCSTATICFLAGS=${CCFLAGS} -rdynamic
 LDFLAGS=
 LDSTATICFLAGS=${LDFLAGS} -ldl
@@ -24,16 +25,8 @@ plugin.o: plugin.cpp plugin.h constants.h helpers.h
 helpers.o: helpers.cpp helpers.h
 	g++ ${CCFLAGS} -c -o $@ $<
 
-#############################################################
-# TODO: figure out what to do w/ these 2 GPU check functions...
-has_cuda_gpu: has_cuda_gpu.cu
-	nvcc has_cuda_gpu.cu -o has_cuda_gpu
-
-has_opencl_gpu: has_opencl_gpu.cpp
-	g++ has_opencl_gpu.cpp -l OpenCL
-
 clean:
-	rm -f *.o gpgpu has_cuda_gpu has_opencl_gpu
+	rm -f *.o gpgpu
 	cd plugins/; make clean
 
 .SECONDARY: ${OBJECTS}

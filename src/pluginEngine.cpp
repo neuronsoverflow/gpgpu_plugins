@@ -1,5 +1,6 @@
 #include "helpers.h"
 #include "pluginEngine.h"
+#include <ctime>
 #include <iostream>
 
 using namespace std;
@@ -35,6 +36,8 @@ void PluginEngine::run()
       if (cmdArgs.empty())
          continue;
 
+      cout << '\n';
+
       if (!isValidCommand(cmdArgs))
       {
          cout << "Invalid command or invalid number of arguments\n";
@@ -68,6 +71,7 @@ void PluginEngine::run()
       else if (cmdArgs[0] == "run") // run <plugin_name>
       {
          (it->second)->run();
+         displayRunTime(it);
       }
       else if (cmdArgs[0] == "time") // time <plugin_name>
       {
@@ -138,9 +142,14 @@ void PluginEngine::loadPlugin(string filename)
 
    try
    {
+      clock_t start_t = clock();
+      clock_t total_t;
       cout << "loading: '" << filename << "'\n";
       plugins[pluginName] = new Plugin(filename);
-      cout << "plugin loaded successfully! Displaying it's parameters:\n";
+      total_t = clock() - start_t;
+      cout << "plugin loaded successfully in "
+           << (total_t * 1000) / (double) CLOCKS_PER_SEC << "ms\n"
+           << "Displaying it's parameters:\n";
       plugins[pluginName]->displayParams();
    }
    catch (char* e)
