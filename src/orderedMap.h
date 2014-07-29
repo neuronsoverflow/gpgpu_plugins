@@ -1,8 +1,8 @@
 #ifndef ORDEREDMAP_H
 #define ORDEREDMAP_H
 
-#include <utility> // pair()
 #include <string>
+#include <utility> // pair()
 #include <vector>
 
 /******************************************************************************

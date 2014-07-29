@@ -1,5 +1,10 @@
+/******************************************************************************
+* This file is for the Prime Numbers plugin.
+* It requires prime.cu that implements genPrimesOnDevice()
+******************************************************************************/
 #include "constants.h"
 #include "pluginHeader.h"
+
 #include <boost/algorithm/string.hpp> // starts_with
 #include <cstdlib> // atoi, strtoull
 #include <cstring> /* strcpy */

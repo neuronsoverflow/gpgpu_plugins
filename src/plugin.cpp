@@ -1,8 +1,9 @@
-#include "plugin.h"
 #include "constants.h"
 #include "helpers.h"
-#include <cstring> // strcmp
-#include <dlfcn.h> // dlopen(), dlsym(), dlclose(), dlerror() - requires: -ldl
+#include "plugin.h"
+
+#include <cstring>  // strcmp
+#include <dlfcn.h>  // dlopen(), dlsym(), dlclose(), dlerror() - requires: -ldl
 #include <iostream> // cout
 #include <vector>
 

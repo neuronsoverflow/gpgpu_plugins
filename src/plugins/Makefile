@@ -10,7 +10,7 @@ OBJECTS += matrixLinker.o matrixPlugin.o matrixKernel.o matrix.o
 OBJECTS += primeLinker.o primePlugin.o primeKernel.o prime.o
 OBJECTS += graphLinker.o graphPlugin.o graphKernel.o graph.o
 
-INCLUDE=-I ../ -I include/ -I /home/paulo/NVIDIA_CUDA-6.0_Samples/common/inc
+INCLUDE=-I ../ -I include/
 
 CUDA_PATH ?= "/usr/local/cuda-6.0"
 GCC ?= g++

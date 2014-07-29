@@ -3,14 +3,16 @@
 *  "Accelerating Large Graph Algorithms on the GPU using CUDA" (HiPC 2007)
 *  by Pawan Harish and P.J. Narayanan
 *
-*
-*
+*  This file implements:
+*    - BFS
+*    - SSSP
+*    - APSP
 ******************************************************************************/
 #include "graph.h"
-#include <stdio.h>
+// #include <float.h> // FLT_MAX
 #include <helper_cuda.h> // checkCudaErrors- NVIDIA_CUDA-6.0_Samples/common/inc
 #include <limits.h>
-#include <float.h> // FLT_MAX
+#include <stdio.h>
 
 
 ////////////////////////// HELPER FUNCTIONS

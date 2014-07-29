@@ -1,5 +1,6 @@
 #include "constants.h"
 #include "pluginHeader.h"
+
 #include <boost/algorithm/string.hpp> // starts_with
 #include <cstdlib> // atoi
 #include <cstring> /* strcpy  */

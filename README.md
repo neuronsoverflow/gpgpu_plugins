@@ -4,46 +4,55 @@ GPGPU Plugins
 Description
 ----
 
-This project is NOT yet finished!
-I'm currently coding it such that it will:
-- Allow the user to load plugins into it, and they will run on the GPU
+For this project I wanted to created a generic application that would be able to run programs on the GPU.
+I created a main executable (`gpgpu`) which is able to load plugins, set their parameters and run their programs. Each plugin (dynamic shared object) has a specific function format (see [pluginHeader.h](src/plugins/include/pluginHeader.h)) which must be used in order for the plugin engine to load the shared libraries appropriately.
+
+Note that the plugins I've written can be run as standalone executables as well. Just use `make executables` in the plugins/ directory to generate them.
 
 
 Requirements / Libaries
 ----
 
-  - Linux x86_64
-  - A GPU that [suports CUDA](https://developer.nvidia.com/cuda-gpus) or [OpenCL 1.1+](http://www.khronos.org/conformance/adopters/conformant-products#opencl)
-  - [OpenCL 1.1+](https://www.khronos.org/opencl/)
-  - [CUDA 6.0](https://developer.nvidia.com/cuda-zone) (still deciding if this will be required)
+  - Linux x86_64 (I've implemented this using Ubuntu 13.10)
+  - A GPU device that [suports CUDA](https://developer.nvidia.com/cuda-gpus) (Compute Capability 2+)
+  - [CUDA 6.0](https://developer.nvidia.com/cuda-zone)
 
 
 Plugins
 -----------
-The following are plugins that are planned for being written.
-- Matrix Multiplication ~ a simple matrix multiplication
-- Prime Number Generator ~ uses the parallel computing power of GPUs to generate prime numbers
-- Graph Search ~ loads a graph and allows the user to run these algorithms:
+The following are plugins that have been written.
+- `matrix.so` - Matrix Multiplication ~ a simple matrix multiplication
+- `prime.so` - Uses the Sieve of Eratosthenes for generating Prime Numbers
+- `graph.so` - Graph Search ~ loads a graph and allows the user to run these algorithms:
     - Breadth-First Search
     - Single-Source Shortest Path
     - All-Pairs Shortest Path
 
+All of the graph algorithms were based on the algorithms given by Pawan Harish and P.J. Narayanan (HiPC 2007)
 
 Installation
 --------------
-After having
+Assuming that you have the requirements (CUDA6) installed and working, and that you are using a Linux system, then the following should just work.
+
 ```sh
-git clone git@github.com:paulohefagundes/gpgpu_plugins.git
+# get a copy of the source code
+git clone https://github.com/paulohefagundes/gpgpu_plugins.git
+
+# go to the src/ directory
 cd gpgpu_plugins/src
+
+# make it so!
 make
 ```
+If there are any errors, check the Makefiles. (I have some hardcoded filepaths such as for CUDA's `nvcc`)
 
 Usage
 -------
-to be written....
+See [gpgpu readme](src/README.md)
 
 
 License
 ----
 
-MIT
+[MIT](LICENSE.md)
+

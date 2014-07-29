@@ -2,8 +2,8 @@
 #define PLUGIN_H
 
 #include "orderedMap.h"
-#include <string>
 #include <ctime> // clock_t
+#include <string>
 
 // setup the function pointer types
 typedef int         (*run_f)   (); // run()
@@ -14,7 +14,12 @@ typedef const char* (*paramInfo_f) ();   // getParamInfo()
 typedef int         (*numArgs_f) ();     // getNumArgs()
 typedef clock_t     (*time_f)  ();       // getRunTime()
 
-// a Wrapper for loading the dynamic libraries w/ dlopen...
+/******************************************************************************
+* Plugin Class
+* This is a Wrapper class for loading the dynamic libraries w/ dlopen...
+* Note that the function pointers must match the functions found in:
+*   - plugins/include/pluginHeader.h
+******************************************************************************/
 class Plugin
 {
    public:

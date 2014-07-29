@@ -9,7 +9,8 @@ $failures = 0
 # run_matrix()
 ###############################################################################
 def run_matrix(pipe)
-  $matrix_files = %w(matrix3_3 matrix100_100 matrix300_300 matrix1000_1000 matrix5000_5000)
+  # $matrix_files = %w(matrix3_3 matrix100_100 matrix300_300 matrix1000_1000) # matrix5000_5000)
+  $matrix_files = `ls -1 data/matrix/*C.txt`.split.map { |m| m[12..-6] }
   prefix = "data/matrix/"
   pipe.puts "set matrix displayResult 0"
   $matrix_files.each do |f|
@@ -126,9 +127,9 @@ def check_graph_results()
     cmds = [cmdBFS, cmdSSSP, cmdAPSP]
     cmds.each_with_index do |cmd, i|
       if `#{cmd}; echo $?`.strip == '0'
-        puts "#{PASSED} GRAPHS - #{tests[i]}"
+        puts "#{PASSED} GRAPHS - #{f}_#{tests[i]}"
       else
-        puts "#{FAILED} GRAPHS - #{tests[i]}"
+        puts "#{FAILED} GRAPHS - #{f}_#{tests[i]}"
         puts "failed command: #{cmd}"
         $failures += 1
       end
@@ -142,7 +143,7 @@ end
 ###############################################################################
 
 # make sure everything is built before running the tests
-result = system("cd ../../ && make gpgpu && cd plugins && make plugins");
+result = system("cd ../src && make gpgpu && cd plugins && make plugins");
 if result == false || result == nil
   puts "Failed to build the system for running the tests"
   exit result
@@ -155,13 +156,13 @@ end
 # open a pipe with popen to emulate terminal inputs / output
 puts "Running all tests..."
 shell_output = ""
-IO.popen('../../gpgpu', 'r+') do |pipe|
+IO.popen('../src/gpgpu', 'r+') do |pipe|
 
   # load the plugins
-  pipe.puts("load ../hello.so")
-  pipe.puts("load ../matrix.so")
-  pipe.puts("load ../prime.so")
-  pipe.puts("load ../graph.so")
+  pipe.puts("load ../src/plugins/hello.so")
+  pipe.puts("load ../src/plugins/matrix.so")
+  pipe.puts("load ../src/plugins/prime.so")
+  pipe.puts("load ../src/plugins/graph.so")
 
   # list the parameters for each plugin
   pipe.puts("list")
