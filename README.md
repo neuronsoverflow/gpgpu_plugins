@@ -54,5 +54,4 @@ See [gpgpu readme](src/README.md)
 License
 ----
 
-[MIT](LICENSE.md)
-
+[MIT](LICENCE.md)
