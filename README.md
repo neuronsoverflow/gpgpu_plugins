@@ -9,15 +9,12 @@ I created a main executable (`gpgpu`) which is able to load plugins, set their p
 
 Note that the plugins I've written can be run as standalone executables as well. Just use `make executables` in the plugins/ directory to generate them.
 
-
-Requirements / Libaries
-----
-
-  - Linux x86_64 (I've implemented this using Ubuntu 13.10)
-  - A GPU device that [suports CUDA](https://developer.nvidia.com/cuda-gpus) (Compute Capability 2+)
-  - [CUDA 6.0](https://developer.nvidia.com/cuda-zone) or above
-  - CMake
-
+Requirements
+-----
+  - Linux x86_64 (I've originally implemented this using Ubuntu 13.10)
+  - A GPU device that [supports CUDA](https://developer.nvidia.com/cuda-gpus) (Compute Capability 2+)
+  - [CUDA 6.0](https://developer.nvidia.com/cuda-zone) or above (I've recently tested this on CUDA 10 and it still works)
+  - CMake 3.13 or newer
 
 Plugins
 -----------
@@ -33,7 +30,7 @@ All of the graph algorithms were based on the algorithms given by Pawan Harish a
 
 Build
 --------------
-Assuming that you have the requirements (CUDA6 or newer and CMake) installed and working, and that you are using a Linux system, then the following should just work.
+Assuming that you have the requirements (CUDA 6 or newer and CMake) installed and working, and that you are using a Linux system, then the following should just work.
 
 ```sh
 # get a copy of the source code
@@ -52,7 +49,7 @@ cd ..
 
 Usage
 -------
-See [gpgpu readme](src/README.md)
+See [gpgpu readme](src/main/README.md)
 
 
 License
