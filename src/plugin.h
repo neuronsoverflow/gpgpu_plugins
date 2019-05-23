@@ -23,7 +23,7 @@ typedef clock_t (*time_f)();          // getRunTime()
 class Plugin
 {
   public:
-    Plugin(const std::string& filename) throw(char*);
+    Plugin(const std::string& filename);
     ~Plugin();
 
     int run();
@@ -58,7 +58,7 @@ class Plugin
 
     OrderedMap params;
 
-    void loadSymbols() throw(char*);
+    void loadSymbols();
     void refreshParams(); // getParams() that sets the params map
     void updateParams();  // setParams() from the values in the params map
 };

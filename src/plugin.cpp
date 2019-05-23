@@ -10,7 +10,7 @@
 /******************************************************************************
  * Plugin handler class constructor
  ******************************************************************************/
-Plugin::Plugin(const std::string& filename) throw(char*)
+Plugin::Plugin(const std::string& filename)
 {
     // attempt to load the plugin handler
     handle = dlopen(filename.c_str(), RTLD_NOW);
@@ -85,7 +85,7 @@ clock_t Plugin::getRunTime()
  * - assigns a pointer to each function that will be used in the plugin
  * - see: man 3 dlsym
  ******************************************************************************/
-void Plugin::loadSymbols() throw(char*)
+void Plugin::loadSymbols()
 {
     char* error;
 
