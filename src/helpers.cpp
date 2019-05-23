@@ -45,7 +45,7 @@ std::vector<std::string> split(const std::string& s, char delim)
 std::string shortName(const std::string& filename)
 {
     std::string result = filename;
-    unsigned int pos = result.find_last_of("/") + 1; // strip leading dirs
+    std::string::size_type pos = result.find_last_of("/") + 1; // strip leading dirs
     result = result.substr(pos);
     std::string extension = ".so"; // strip .so extension (if any)
     pos = result.find(extension);

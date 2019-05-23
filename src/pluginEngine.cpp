@@ -18,7 +18,7 @@ PluginEngine::PluginEngine()
  * run()
  * - displays the options
  * - continually prompt the user for commands and execute them
- * - stops when the user uses "exit"
+ * - stops when the user uses "quit"
  ******************************************************************************/
 void PluginEngine::run()
 {
@@ -28,7 +28,7 @@ void PluginEngine::run()
 
     displayOptions();
 
-    while (command != "exit")
+    while (command != "quit")
     {
         command = getCommand();        // prompt the user
         cmdArgs = split(command, ' '); // put the args in a vector
@@ -118,7 +118,7 @@ bool PluginEngine::isValidCommand(const vector<string>& cmd)
                       (cmd[0] == "help" && s == 2) || // help <plugin_name>
                       (cmd[0] == "list" && s == 1) || // list
                       (cmd[0] == "?" && s == 1) ||    // ?
-                      (cmd[0] == "exit" && s == 1))); // exit
+                      (cmd[0] == "quit" && s == 1))); // quit
 }
 
 /******************************************************************************
@@ -207,5 +207,5 @@ void PluginEngine::displayOptions()
          << "\thelp <plugin_name> - shows the plugin's help instructions\n"
          << "\tlist - lists the loaded plugins and their respective parameters\n"
          << "\t? - show these options\n"
-         << "\texit\n";
+         << "\tquit\n";
 }

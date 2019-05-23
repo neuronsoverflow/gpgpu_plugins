@@ -32,7 +32,7 @@ All of the graph algorithms were based on the algorithms given by Pawan Harish a
 
 Installation
 --------------
-Assuming that you have the requirements (CUDA6) installed and working, and that you are using a Linux system, then the following should just work.
+Assuming that you have the requirements (CUDA6 or newer) installed and working, and that you are using a Linux system, then the following should just work.
 
 ```sh
 # get a copy of the source code
@@ -42,7 +42,7 @@ git clone https://github.com/paulohefagundes/gpgpu_plugins.git
 cd gpgpu_plugins/src
 
 # make it so!
-make
+make # NOTE that you might need to pass the path of cuda installation. example: `CUDA_PATH=/opt/cuda/ make`
 
 # run tests
 cd ..
