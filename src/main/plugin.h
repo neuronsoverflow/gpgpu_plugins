@@ -6,13 +6,13 @@
 #include <string>
 
 // setup the function pointer types
-typedef int (*run_f)();               // run()
-typedef int (*setP_f)(const char*);   // setParams()
-typedef int (*getP_f)(char*, int);    // getParams()
-typedef void* (*pluginInfo_f)();      // getPluginInfo()
-typedef const char* (*paramInfo_f)(); // getParamInfo()
-typedef int (*numArgs_f)();           // getNumArgs()
-typedef clock_t (*time_f)();          // getRunTime()
+using run_f = int (*)();               // run()
+using setP_f = int (*)(const char*);   // setParams()
+using getP_f = int (*)(char*, int);    // getParams()
+using pluginInfo_f = void* (*)();      // getPluginInfo()
+using paramInfo_f = const char* (*)(); // getParamInfo()
+using numArgs_f = int (*)();           // getNumArgs()
+using time_f = clock_t (*)();          // getRunTime()
 
 /******************************************************************************
  * Plugin Class

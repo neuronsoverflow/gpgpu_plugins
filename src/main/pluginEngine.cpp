@@ -156,7 +156,7 @@ void PluginEngine::loadPlugin(string filename)
         cout << "loading: '" << filename << "'\n";
         plugins[pluginName] = new Plugin(filename);
         total_t = clock() - start_t;
-        cout << "plugin loaded successfully in " << (total_t * 1000) / (double)CLOCKS_PER_SEC << "ms\n"
+        cout << "plugin loaded successfully in " << (total_t * 1000) / static_cast<double>(CLOCKS_PER_SEC) << "ms\n"
              << "Displaying it's parameters:\n";
         plugins[pluginName]->displayParams();
     }
@@ -200,7 +200,8 @@ void PluginEngine::displayPlugins()
 void PluginEngine::displayRunTime(const map<string, Plugin*>::iterator& it)
 {
     // prime plugin's last run took: 0.000 seconds
-    cout << "\"" << it->first << "\" plugin's last run took: " << (it->second)->getRunTime() / (double)CLOCKS_PER_SEC
+    cout << "\"" << it->first
+         << "\" plugin's last run took: " << (it->second)->getRunTime() / static_cast<double>(CLOCKS_PER_SEC)
          << " seconds\n";
 }
 

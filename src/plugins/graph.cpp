@@ -1,5 +1,5 @@
-#include "constants.h"
 #include "graph.h"
+#include "constants.h"
 #include "pluginHeader.h"
 
 #include <boost/algorithm/string.hpp> // starts_with, to_lower
@@ -461,7 +461,7 @@ int setParams(const char* buffer)
         for (i = 0; i < NUM_ARGS && arg; ++i)
         {
             strcpy(params[i], arg);
-            arg = strtok(NULL, DELIM_STR);
+            arg = strtok(nullptr, DELIM_STR);
         }
 
         return OK; // OK
@@ -516,7 +516,7 @@ void* displayPluginInfo()
               << "                           BFS and SSSP)\n"
               << "\t* displayResult - flag '0' or '1'. If true, then display the result on\n"
               << "                           the screen\n";
-    return NULL;
+    return nullptr;
 }
 
 /******************************************************************************

@@ -13,7 +13,7 @@ class OrderedMap
 {
   public:
     // this is the kind of vector that the class contains
-    typedef std::pair<std::string, std::string> item;
+    using item = std::pair<std::string, std::string>;
 
     OrderedMap();
     void insert(std::pair<std::string, std::string>);
@@ -26,8 +26,8 @@ class OrderedMap
     void clear() { map.clear(); }
 
     // iterator support :D
-    typedef std::vector<item>::iterator iterator;
-    typedef std::vector<item>::const_iterator const_iterator;
+    using iterator = std::vector<item>::iterator;
+    using const_iterator = std::vector<item>::const_iterator;
     iterator begin() { return map.begin(); }
     const_iterator begin() const { return map.begin(); }
     iterator end() { return map.end(); }

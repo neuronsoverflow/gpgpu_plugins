@@ -12,8 +12,6 @@
 #include <iomanip>                    // setw
 #include <iostream>
 
-// typedef unsigned long long int uint64;
-
 // Prime Number functions
 int writePrimesFile(const char* filename, const char* primes, uint64_t size);
 uint64_t getPrimesCount(const char* primes, uint64_t size);
@@ -154,7 +152,7 @@ int run()
     clock_t end_t;
     total_t = 0; // reset the clock counter
 
-    uint64_t maxPrime = strtoull(params[1], NULL, 10); // TODO: check for errors
+    uint64_t maxPrime = strtoull(params[1], nullptr, 10); // TODO: check for errors
     char* primes;
     maxPrime++; // allow the given parameter to be part of the search
 
@@ -163,7 +161,7 @@ int run()
 #endif
 
     primes = new (std::nothrow) char[maxPrime]();
-    if (primes == NULL)
+    if (primes == nullptr)
     {
         std::cout << "Failed to allocate memory for the prime numbers.\n"
                   << "The limit parameter might be too large: " << maxPrime << std::endl;
@@ -235,7 +233,7 @@ int setParams(const char* buffer)
         for (i = 0; i < NUM_ARGS && arg; ++i)
         {
             strcpy(params[i], arg);
-            arg = strtok(NULL, DELIM_STR);
+            arg = strtok(nullptr, DELIM_STR);
         }
 
         return OK; // OK
@@ -285,7 +283,7 @@ void* displayPluginInfo()
               << "By default, the generated primes won't be displayed to the screen.\n"
               << "However, if an error occurs while writing the results to the file, this program\n"
               << "will display the generated list of prime numbers.\n";
-    return NULL;
+    return nullptr;
 }
 
 /******************************************************************************

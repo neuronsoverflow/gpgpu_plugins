@@ -15,7 +15,7 @@ Plugin::Plugin(const std::string& filename)
     // attempt to load the plugin handler
     handle = dlopen(filename.c_str(), RTLD_NOW);
 
-    if (handle == NULL)
+    if (handle == nullptr)
         throw(dlerror());
 
     // now load the function symbols
@@ -92,38 +92,38 @@ void Plugin::loadSymbols()
     // load the function pointers
     dlerror(); /* Clear any existing error */
     fRun = reinterpret_cast<run_f>(dlsym(handle, "run"));
-    if ((error = dlerror()) != NULL)
+    if ((error = dlerror()) != nullptr)
         throw(error);
 
     dlerror(); /* Clear any existing error */
     fSetParams = reinterpret_cast<setP_f>(dlsym(handle, "setParams"));
-    if ((error = dlerror()) != NULL)
+    if ((error = dlerror()) != nullptr)
         throw(error);
 
     dlerror(); /* Clear any existing error */
     fGetParams = reinterpret_cast<getP_f>(dlsym(handle, "getParams"));
-    if ((error = dlerror()) != NULL)
+    if ((error = dlerror()) != nullptr)
         throw(error);
 
     dlerror(); /* Clear any existing error */
     fPluginInfo = reinterpret_cast<pluginInfo_f>(dlsym(handle, "displayPluginInfo"));
-    if ((error = dlerror()) != NULL)
+    if ((error = dlerror()) != nullptr)
         throw(error);
 
     dlerror(); /* Clear any existing error */
     fParamInfo = reinterpret_cast<paramInfo_f>(dlsym(handle, "getParamInfo"));
-    if ((error = dlerror()) != NULL)
+    if ((error = dlerror()) != nullptr)
         throw(error);
 
     dlerror(); /* Clear any existing error */
     fTime = reinterpret_cast<time_f>(dlsym(handle, "getRunTime"));
-    if ((error = dlerror()) != NULL)
+    if ((error = dlerror()) != nullptr)
         throw(error);
 
     // load numParams = NUM_ARGS pointer
     dlerror(); /* Clear any existing error */
     fNumArgs = reinterpret_cast<numArgs_f>(dlsym(handle, "getNumArgs"));
-    if ((error = dlerror()) != NULL)
+    if ((error = dlerror()) != nullptr)
         throw(error);
     this->numParams = fNumArgs();
 }

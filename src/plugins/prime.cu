@@ -1,8 +1,6 @@
 #include <helper_cuda.h> // checkCudaErrors- NVIDIA_CUDA-6.0_Samples/common/inc
 #include <stdio.h>
 
-// typedef unsigned long long int uint64_t;
-
 /******************************************************************************
  * kernel that initializes the 1st couple of values in the primes array.
  ******************************************************************************/
