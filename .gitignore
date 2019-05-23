@@ -4,4 +4,4 @@
 *.o
 gpgpu
 a.out
-tmp/**
+tmp/

@@ -3,6 +3,14 @@
 PASSED = "\e[1;32mPASSED\e[0m"  # green color
 FAILED = "\e[1;31mFAILED\e[0m"  # red   color
 
+TEST_PRIME = true
+TEST_GRAPH = true
+TEST_MATRIX = true
+
+BASE_DIR = File.expand_path("#{__dir__}/..").freeze
+TMP_DIR = "#{BASE_DIR}/tests/tmp".freeze
+DATA_DIR = "#{BASE_DIR}/tests/data".freeze
+
 $failures = 0
 
 ###############################################################################
@@ -10,13 +18,13 @@ $failures = 0
 ###############################################################################
 def run_matrix(pipe)
   # $matrix_files = %w(matrix3_3 matrix100_100 matrix300_300 matrix1000_1000) # matrix5000_5000)
-  $matrix_files = `ls -1 data/matrix/*C.txt`.split.map { |m| m[12..-6] }
-  prefix = "data/matrix/"
+  $matrix_files = `ls -1 #{DATA_DIR}/matrix/*C.txt`.split.map { |m| File.basename(m, 'txt')[0..-3] }
+  prefix = "#{DATA_DIR}/matrix/"
   pipe.puts "set matrix displayResult 0"
   $matrix_files.each do |f|
     pipe.puts "set matrix inputFileMatrixA #{prefix}#{f}A.txt"
     pipe.puts "set matrix inputFileMatrixB #{prefix}#{f}B.txt"
-    pipe.puts "set matrix OutputFileMatrixC tmp/#{f}C.txt"
+    pipe.puts "set matrix OutputFileMatrixC #{TMP_DIR}/#{f}C.txt"
     pipe.puts "run matrix"
   end
 end
@@ -26,13 +34,13 @@ end
 ###############################################################################
 def check_matrix_results()
   return unless $matrix_files
-  prefix = "data/matrix/"
+  prefix = "#{DATA_DIR}/matrix/"
   $matrix_files.each do |f|
-    if `diff -w -B tmp/#{f}C.txt #{prefix}#{f}C.txt; echo $?`.strip == '0'
+    if `diff -w -B #{TMP_DIR}/#{f}C.txt #{prefix}#{f}C.txt; echo $?`.strip == '0'
       puts "#{PASSED} MATRIX - #{f}C.txt"
     else
       puts "#{FAILED} MATRIX - #{f}C.txt"
-      puts "failed command: diff -w -B tmp/#{f}C.txt #{prefix}#{f}C.txt"
+      puts "failed command: diff -w -B #{TMP_DIR}/#{f}C.txt #{prefix}#{f}C.txt"
       $failures += 1
     end
   end
@@ -45,7 +53,7 @@ def run_prime(pipe)
   $prime_limits = [101, 200, 256, 500, 512, 1000, 1024, 10000, 50000, 104729]
 
   $prime_limits.each do |limit|
-    pipe.puts "set prime outputFile tmp/primes_#{limit}.txt"
+    pipe.puts "set prime outputFile #{TMP_DIR}/primes_#{limit}.txt"
     pipe.puts "set prime limit #{limit}"
     pipe.puts "run prime"
   end
@@ -56,9 +64,9 @@ end
 ###############################################################################
 def check_prime_results()
   return unless $prime_limits
-  expected = "data/primesExpected.txt"
+  expected = "#{DATA_DIR}/primesExpected.txt"
   $prime_limits.each do |limit|
-    actual = "tmp/primes_#{limit}.txt"
+    actual = "#{TMP_DIR}/primes_#{limit}.txt"
     lines = `wc -l #{actual}`.strip.split(" ").first
     cmd = "head -n #{lines} #{expected} | diff #{actual} -; echo $?"
     if `#{cmd}`.strip == '0'
@@ -76,8 +84,8 @@ end
 ###############################################################################
 def run_graph(pipe)
   $graph_files = %w(simple)
-  input_prefix = 'data/graph/'
-  output_prefix = 'tmp/'
+  input_prefix = "#{DATA_DIR}/graph/"
+  output_prefix = "#{TMP_DIR}/"
   pipe.puts "set graph displayResult 0"
   $graph_files.each do |f|
     pipe.puts "set graph inputFile #{input_prefix}#{f}.txt"
@@ -107,8 +115,8 @@ end
 # check_graph_results()
 ###############################################################################
 def check_graph_results()
-  input_prefix = 'data/graph/'
-  output_prefix = 'tmp/'
+  input_prefix = "#{DATA_DIR}/graph/"
+  output_prefix = "#{TMP_DIR}/"
 
   $graph_files.each do |f|
     # condense the generated files
@@ -137,47 +145,46 @@ def check_graph_results()
   end
 end
 
-
 ###############################################################################
 # main program
 ###############################################################################
 
 # make sure everything is built before running the tests
-result = system("cd ../src && make gpgpu && cd plugins && make plugins");
+result = system("make -C #{BASE_DIR}/src/")
 if result == false || result == nil
   puts "Failed to build the system for running the tests"
   exit result
 end
 
 # clear the old test output files and create a tmp folder if it doesn't exist
-`rm -f tmp/*`
-`mkdir -p tmp/`
+`rm -f #{TMP_DIR}/*`
+`mkdir -p #{TMP_DIR}`
 
 # open a pipe with popen to emulate terminal inputs / output
 puts "Running all tests..."
 shell_output = ""
-IO.popen('../src/gpgpu', 'r+') do |pipe|
+IO.popen("#{BASE_DIR}/src/gpgpu", 'r+') do |pipe|
 
   # load the plugins
-  pipe.puts("load ../src/plugins/hello.so")
-  pipe.puts("load ../src/plugins/matrix.so")
-  pipe.puts("load ../src/plugins/prime.so")
-  pipe.puts("load ../src/plugins/graph.so")
+  pipe.puts("load #{BASE_DIR}/src/plugins/hello.so")
+  pipe.puts("load #{BASE_DIR}/src/plugins/matrix.so") if TEST_MATRIX
+  pipe.puts("load #{BASE_DIR}/src/plugins/prime.so") if TEST_PRIME
+  pipe.puts("load #{BASE_DIR}/src/plugins/graph.so") if TEST_GRAPH
 
   # list the parameters for each plugin
-  pipe.puts("list")
+  # pipe.puts("list") # TODO: this command seems to be breaking things... hmm...
 
   # run hello sample
   pipe.puts("run hello")
 
   # test the matrix
-  run_matrix(pipe)
+  run_matrix(pipe) if TEST_MATRIX
 
   # test the prime numbers
-  run_prime(pipe)
+  run_prime(pipe) if TEST_PRIME
 
   # test the graph
-  run_graph(pipe)
+  run_graph(pipe) if TEST_GRAPH
 
   pipe.puts("exit")
   pipe.close_write
@@ -186,8 +193,8 @@ end
 
 puts "Checking test results..."
 
-check_matrix_results()
-check_prime_results()
-check_graph_results()
+check_matrix_results() if TEST_MATRIX
+check_prime_results() if TEST_PRIME
+check_graph_results() if TEST_GRAPH
 
-# puts shell_output if $failures > 0
+puts shell_output if $failures > 0

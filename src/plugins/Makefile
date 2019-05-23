@@ -12,7 +12,7 @@ OBJECTS += graphLinker.o graphPlugin.o graphKernel.o graph.o
 
 INCLUDE=-I ../ -I include/
 
-CUDA_PATH ?= "/usr/local/cuda-6.0"
+CUDA_PATH ?= /opt/cuda
 GCC ?= g++
 NVCC := $(CUDA_PATH)/bin/nvcc -ccbin $(GCC)
 NVCCFLAGS   := -m64 -O3
@@ -25,7 +25,7 @@ NVCCDYNAMICFLAGS=${NVCCFLAGS} --compiler-options '-fPIC'
 # commenting out the unsupported gpu architectures for my NVIDIA Device:
 # GENCODE_SM10    := -gencode arch=compute_10,code=sm_10
 # GENCODE_SM11    := -gencode arch=compute_11,code=sm_11
-GENCODE_SM20    := -gencode arch=compute_20,code=sm_20
+# GENCODE_SM20    := -gencode arch=compute_20,code=sm_20
 GENCODE_SM30    := -gencode arch=compute_30,code=sm_30
 GENCODE_SM32    := -gencode arch=compute_32,code=sm_32
 GENCODE_SM35    := -gencode arch=compute_35,code=sm_35
@@ -40,10 +40,10 @@ plugins: ${PLUGINS}
 executables: ${EXECUTABLES}
 
 # %.so: %.o
-# 	${CC} ${LDDYNAMICFLAGS} -o $@ $<
+#	${CC} ${LDDYNAMICFLAGS} -o $@ $<
 
 # %.o: %.c
-# 	${CC} ${CCDYNAMICFLAGS} ${INCLUDE} -c -o $@ $<
+#	${CC} ${CCDYNAMICFLAGS} ${INCLUDE} -c -o $@ $<
 
 # ///////////////////// Prime plugin
 
@@ -65,10 +65,10 @@ executables: ${EXECUTABLES}
 # ///////////////////// generic executable maker
 # these are not working for some reason... Hmm...
 # %: %.cpp %Executable.o
-# 	g++ ${DEBUG} $^ -o $@ ${INCLUDE} -l cudart
+#	g++ ${DEBUG} $^ -o $@ ${INCLUDE} -l cudart
 
 # %Executable.o: %.cu
-# 	$(NVCC) ${NVCCFLAGS} -c $< -o $@ ${INCLUDE}
+#	$(NVCC) ${NVCCFLAGS} -c $< -o $@ ${INCLUDE}
 
 
 # ///////////////////// Prime executable
