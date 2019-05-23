@@ -15,7 +15,7 @@ Requirements / Libaries
 
   - Linux x86_64 (I've implemented this using Ubuntu 13.10)
   - A GPU device that [suports CUDA](https://developer.nvidia.com/cuda-gpus) (Compute Capability 2+)
-  - [CUDA 6.0](https://developer.nvidia.com/cuda-zone)
+  - [CUDA 6.0](https://developer.nvidia.com/cuda-zone) or above
 
 
 Plugins
@@ -43,6 +43,10 @@ cd gpgpu_plugins/src
 
 # make it so!
 make
+
+# run tests
+cd ..
+./tests/run_tests.rb
 ```
 If there are any errors, check the Makefiles. (I have some hardcoded filepaths such as for CUDA's `nvcc`)
 
@@ -54,4 +58,4 @@ See [gpgpu readme](src/README.md)
 License
 ----
 
-[MIT](LICENCE.md)
+[MIT](LICENSE.md)

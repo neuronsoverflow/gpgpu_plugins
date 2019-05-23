@@ -1,5 +1,5 @@
-#include <stdio.h>
 #include <helper_cuda.h> // checkCudaErrors- NVIDIA_CUDA-6.0_Samples/common/inc
+#include <stdio.h>
 
 // typedef unsigned long long int uint64_t;
 
