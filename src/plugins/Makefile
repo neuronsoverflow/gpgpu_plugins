@@ -10,7 +10,7 @@ OBJECTS += matrixLinker.o matrixPlugin.o matrixKernel.o matrix.o
 OBJECTS += primeLinker.o primePlugin.o primeKernel.o prime.o
 OBJECTS += graphLinker.o graphPlugin.o graphKernel.o graph.o
 
-INCLUDE=-I ../ -I include/
+INCLUDE=-I ../../include -I include/
 
 CUDA_PATH ?= /opt/cuda
 GCC ?= g++

@@ -12,7 +12,7 @@
 #include <time.h>   /* clock_t */
 
 /* globals */
-char params[][256] = {};
+char params[][256] = {0};
 const int NUM_ARGS = sizeof params / sizeof params[0];
 clock_t total_t = 0;
 const char* PARAM_INFO = "";

@@ -1,15 +1,31 @@
 #!/usr/bin/ruby
 
-PASSED = "\e[1;32mPASSED\e[0m"  # green color
-FAILED = "\e[1;31mFAILED\e[0m"  # red   color
+require 'open3'
+
+PASSED = "\e[1;32mPASSED\e[0m".freeze  # green color
+FAILED = "\e[1;31mFAILED\e[0m".freeze  # red   color
 
 TEST_PRIME = true
 TEST_GRAPH = true
 TEST_MATRIX = true
+BUILD_WITH_CMAKE = true
 
 BASE_DIR = File.expand_path("#{__dir__}/..").freeze
 TMP_DIR = "#{BASE_DIR}/tests/tmp".freeze
 DATA_DIR = "#{BASE_DIR}/tests/data".freeze
+BUILD_DIR = "#{BASE_DIR}/build".freeze
+
+MAIN_PROGRAM_PATH  = "#{BUILD_DIR}/bin/gpgpu".freeze
+PLUGIN_HELLO_PATH  = "#{BUILD_DIR}/lib/hello.so".freeze
+PLUGIN_MATRIX_PATH = "#{BUILD_DIR}/lib/matrix.so".freeze
+PLUGIN_GRAPH_PATH  = "#{BUILD_DIR}/lib/graph.so".freeze
+PLUGIN_PRIME_PATH  = "#{BUILD_DIR}/lib/prime.so".freeze
+
+CMAKE_BUILD_CMD = "mkdir -p #{BUILD_DIR} && cd #{BUILD_DIR} && " \
+                  "cmake -DCMAKE_RUNTIME_OUTPUT_DIRECTORY='#{BUILD_DIR}/bin' " \
+                  "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY='#{BUILD_DIR}/lib' " \
+                  '-DENABLE_CLANG_FORMAT=OFF -DENABLE_CLANG_TIDY=OFF .. && ' \
+                  'cmake --build .'.freeze
 
 $failures = 0
 
@@ -42,6 +58,7 @@ def check_matrix_results()
       puts "#{FAILED} MATRIX - #{f}C.txt"
       puts "failed command: diff -w -B #{TMP_DIR}/#{f}C.txt #{prefix}#{f}C.txt"
       $failures += 1
+      exit 1
     end
   end
 end
@@ -68,6 +85,11 @@ def check_prime_results()
   $prime_limits.each do |limit|
     actual = "#{TMP_DIR}/primes_#{limit}.txt"
     lines = `wc -l #{actual}`.strip.split(" ").first
+    unless lines
+      puts "failed to check the number of lines in: #{actual}"
+      $failures += 1
+      exit 1
+    end
     cmd = "head -n #{lines} #{expected} | diff #{actual} -; echo $?"
     if `#{cmd}`.strip == '0'
       puts "#{PASSED} PRIMES - primes_#{limit}.txt"
@@ -75,6 +97,7 @@ def check_prime_results()
       puts "#{FAILED} PRIMES - primes_#{limit}.txt"
       puts "failed command: #{cmd}"
       $failures += 1
+      exit 1
     end
   end
 end
@@ -140,6 +163,7 @@ def check_graph_results()
         puts "#{FAILED} GRAPHS - #{f}_#{tests[i]}"
         puts "failed command: #{cmd}"
         $failures += 1
+        exit 1
       end
     end
   end
@@ -150,7 +174,7 @@ end
 ###############################################################################
 
 # make sure everything is built before running the tests
-result = system("make -C #{BASE_DIR}/src/")
+result = system(CMAKE_BUILD_CMD)
 if result == false || result == nil
   puts "Failed to build the system for running the tests"
   exit result
@@ -163,32 +187,39 @@ end
 # open a pipe with popen to emulate terminal inputs / output
 puts "Running all tests..."
 shell_output = ""
-IO.popen("#{BASE_DIR}/src/gpgpu", 'r+') do |pipe|
+cmd_status = 0
+Open3.popen2e(MAIN_PROGRAM_PATH, 'r+') do |stdin, stdout, wait_thr|
+  # out_reader = Thread.new { p stdout.read }
 
   # load the plugins
-  pipe.puts("load #{BASE_DIR}/src/plugins/hello.so")
-  pipe.puts("load #{BASE_DIR}/src/plugins/matrix.so") if TEST_MATRIX
-  pipe.puts("load #{BASE_DIR}/src/plugins/prime.so") if TEST_PRIME
-  pipe.puts("load #{BASE_DIR}/src/plugins/graph.so") if TEST_GRAPH
+  stdin.puts("load #{PLUGIN_HELLO_PATH}")
+  stdin.puts("load #{PLUGIN_MATRIX_PATH}") if TEST_MATRIX
+  stdin.puts("load #{PLUGIN_PRIME_PATH}") if TEST_PRIME
+  stdin.puts("load #{PLUGIN_GRAPH_PATH}") if TEST_GRAPH
 
   # list the parameters for each plugin
-  # pipe.puts("list") # TODO: this command seems to be breaking things... hmm...
+  stdin.puts("list") # TODO: this command seems to be breaking things... hmm...
 
   # run hello sample
-  pipe.puts("run hello")
+  stdin.puts("run hello")
 
   # test the matrix
-  run_matrix(pipe) if TEST_MATRIX
+  run_matrix(stdin) if TEST_MATRIX
 
   # test the prime numbers
-  run_prime(pipe) if TEST_PRIME
+  run_prime(stdin) if TEST_PRIME
 
   # test the graph
-  run_graph(pipe) if TEST_GRAPH
+  run_graph(stdin) if TEST_GRAPH
 
-  pipe.puts("exit")
-  pipe.close_write
-  shell_output = pipe.read
+  stdin.puts("exit")
+  stdin.close
+
+  sleep 1 # TODO: I think this is a hack to make it work... need to investigate if there's a better way
+  stdout.close
+  # shell_output << out_reader.value
+
+  cmd_status = wait_thr.value.exitstatus
 end
 
 puts "Checking test results..."
@@ -198,3 +229,4 @@ check_prime_results() if TEST_PRIME
 check_graph_results() if TEST_GRAPH
 
 puts shell_output if $failures > 0
+cmd_status

@@ -16,6 +16,7 @@ Requirements / Libaries
   - Linux x86_64 (I've implemented this using Ubuntu 13.10)
   - A GPU device that [suports CUDA](https://developer.nvidia.com/cuda-gpus) (Compute Capability 2+)
   - [CUDA 6.0](https://developer.nvidia.com/cuda-zone) or above
+  - CMake
 
 
 Plugins
@@ -30,25 +31,24 @@ The following are plugins that have been written.
 
 All of the graph algorithms were based on the algorithms given by Pawan Harish and P.J. Narayanan (HiPC 2007)
 
-Installation
+Build
 --------------
-Assuming that you have the requirements (CUDA6 or newer) installed and working, and that you are using a Linux system, then the following should just work.
+Assuming that you have the requirements (CUDA6 or newer and CMake) installed and working, and that you are using a Linux system, then the following should just work.
 
 ```sh
 # get a copy of the source code
 git clone https://github.com/paulohefagundes/gpgpu_plugins.git
 
-# go to the src/ directory
-cd gpgpu_plugins/src
-
-# make it so!
-make # NOTE that you might need to pass the path of cuda installation. example: `CUDA_PATH=/opt/cuda/ make`
+# build
+mkdir -p build
+cd build
+cmake -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="$(pwd)/bin" -DCMAKE_LIBRARY_OUTPUT_DIRECTORY="$(pwd)/lib" ..
+cmake --build .
 
 # run tests
 cd ..
 ./tests/run_tests.rb
 ```
-If there are any errors, check the Makefiles. (I have some hardcoded filepaths such as for CUDA's `nvcc`)
 
 Usage
 -------

@@ -44,6 +44,21 @@ void PluginEngine::run()
             continue;
         }
 
+        if (cmdArgs[0] == "list")
+        {
+            displayPlugins();
+            continue;
+        }
+        else if (cmdArgs[0] == "?")
+        {
+            displayOptions();
+            continue;
+        }
+        else if (cmdArgs[0] == "quit")
+        {
+            break;
+        }
+
         // make the iterator point to the plugin (this is used in view, set, run)
         it = plugins.find(cmdArgs[1]);
         if (it == plugins.end() && (cmdArgs[0] == "view" || cmdArgs[0] == "set" || cmdArgs[0] == "run" ||
@@ -79,13 +94,10 @@ void PluginEngine::run()
         {
             (it->second)->displayPluginInfo();
         }
-        else if (cmdArgs[0] == "list")
+        else
         {
-            displayPlugins();
-        }
-        else if (cmdArgs[0] == "?")
-        {
-            displayOptions();
+            cout << "invalid argument. aborting... -  " << cmdArgs[0] << endl;
+            break;
         }
     }
 }
